@@ -6,9 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -71,7 +74,7 @@ public class SanPhamCtControllerAdm {
             return ResponseEntity.badRequest().body(null);
         }
         Pageable pageable = PageRequest.of(page, size);
-        Page<SanPhamCtDTOAdm> result = sanPhamCtService.searchBySanPhamTen(ten, pageable);
+        Page<SanPhamCtDTOAdm> result = sanPhamCtService.searchBySanPhamMa(ten, pageable);
         return ResponseEntity.ok(result);
     }
 
@@ -198,4 +201,20 @@ public class SanPhamCtControllerAdm {
         Page<SanPhamCtDTOAdm> result = sanPhamCtService.findByMauSacId(mauSacId, pageable);
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/filter")
+    public Page<SanPhamCtDTOAdm> filterSanPhamCt(
+            @RequestParam(required = false) Long sanPhamId,
+            @RequestParam(required = false) Long mauSacId,
+            @RequestParam(required = false) Long thuongHieuId,
+            @RequestParam(required = false) Long kichThuocId,
+            @RequestParam(required = false) Long xuatXuId,
+            @RequestParam(required = false) Long chatLieuId,
+            Pageable pageable) {
+        return sanPhamCtService.filterByAttributes(
+                sanPhamId, mauSacId, thuongHieuId, kichThuocId, xuatXuId, chatLieuId, pageable
+        );
+    }
+
+
 }

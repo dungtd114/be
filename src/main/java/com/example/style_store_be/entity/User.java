@@ -18,7 +18,6 @@ public class User {
     @Column(name = "id")
     private Long id;
 
-
     @Column(name = "ma")
     private String ma;
 

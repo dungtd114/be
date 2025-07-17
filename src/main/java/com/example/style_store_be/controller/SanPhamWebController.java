@@ -73,6 +73,41 @@ public class SanPhamWebController {
         return sanPhamWebService.detailSanPhamCt(id);
     }
 
+    @GetMapping("/page-san-pham")
+    public Page<SanPham> getPageSanPham(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("ngayTao").descending());
+        return sanPhamWebService.getPageSanPham(pageable);
+    }
+
+    @GetMapping("/hien-thi-san-pham-giam-gia")
+    public List<SanPhamWebDto> getListGiamGiaChiTietSanPham(
+            @RequestParam(required = false) String tenSanPham,
+            @RequestParam(required = false) Long thuongHieuId,
+            @RequestParam(required = false) Long mauSacId,
+            @RequestParam(required = false) Long chatLieuId,
+            @RequestParam(required = false) Long kichThuocId,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false, defaultValue = "") String sortOrder,
+            @RequestParam(required = false) Long sanPhamId
+    ) {
+        Sort sort = Sort.unsorted();
+        if ("asc".equalsIgnoreCase(sortOrder)) {
+            sort = Sort.by("giaBan").ascending();
+        } else if ("desc".equalsIgnoreCase(sortOrder)) {
+            sort = Sort.by("giaBan").descending();
+        }
+
+        return sanPhamWebService.getListChiTietSanPham(
+                tenSanPham, thuongHieuId, mauSacId, chatLieuId, kichThuocId,
+                minPrice, maxPrice, sort, sanPhamId
+        );
+    }
+
+
 
 
 }

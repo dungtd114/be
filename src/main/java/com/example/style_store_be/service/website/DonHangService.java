@@ -1,5 +1,8 @@
 package com.example.style_store_be.service.website;
 
+import com.example.style_store_be.dto.GiamGiaDto;
+import com.example.style_store_be.dto.HoaDonCtDto;
+import com.example.style_store_be.dto.LichSuDonHangDto;
 import com.example.style_store_be.dto.request.DonHangRequest;
 import com.example.style_store_be.entity.HoaDon;
 import com.example.style_store_be.entity.HoaDonCt;
@@ -27,6 +30,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.Authentication;
@@ -35,6 +40,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -164,4 +171,43 @@ public class DonHangService {
             throw new RuntimeException("Lỗi tạo PDF: " + e.getMessage(), e);
         }
     }
+
+
+    public Page<LichSuDonHangDto> getLichSuDatHang(
+            Integer trangThaiDonHang,
+            Integer trangThaiThanhToan,
+            Integer phuongThucThanhToan,
+            String maDonHang,
+            String tenSanPham,
+            Date tuNgay,
+            Date denNgay,
+            Pageable pageable
+    ) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepoSitory.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+        Long userId = user.getId();
+        Page<HoaDon> hoaDonPage = donHangRepoSitory.filterLichSuHoaDon(
+                userId, trangThaiDonHang, trangThaiThanhToan, phuongThucThanhToan,
+                maDonHang, tenSanPham, tuNgay, denNgay, pageable
+        );
+
+        return hoaDonPage.map(hd -> new LichSuDonHangDto(
+                hd.getId(),
+                hd.getMa(),
+                hd.getKhachHang().getHoTen(),
+                hd.getTongSoLuongSp(),
+                hd.getDiaChiNhanHang(),
+                hd.getThanhToan().getTen(),
+                hd.getTongTien(),
+                hd.getTrangThai(),
+                hd.getTrangThaiThanhToan(),
+                hd.getNgayDat(),
+                hd.getNgayNhan(),
+                hd.getTienThue()
+        ));
+    }
+
+    public List<HoaDonCtDto> getChiTietDonHang(Long hoaDonId, String tenSanPham) {
+        return donHangRepoSitory.getChiTietByHoaDonIdAndTenSanPham(hoaDonId, tenSanPham);    }
 }

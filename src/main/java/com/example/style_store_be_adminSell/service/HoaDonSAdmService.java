@@ -22,6 +22,10 @@ public interface HoaDonSAdmService {
 
     HoaDonSAdm findHoaDonById(Long id);
 
+    int deleteHoaDon(Long id);
+
     List<HoaDonSAdm> findByMonthsAndTrangThai(LocalDateTime fromDate);
     List<HoaDonSAdm> findByDayAndTrangThai(LocalDateTime startOfDay,LocalDateTime endOfDay);
+    List<HoaDonSAdm> findByDay(LocalDateTime startOfDay,LocalDateTime endOfDay);
+
 }

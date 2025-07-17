@@ -9,7 +9,11 @@ public enum Errorcode {
     USER_NOT_EXISTED(1005, "User not existed"),
     UNAUTHENTICATED(1006, "Unauthenticated"),
     ACCESS_DENIED(403, "Bạn không có quyền truy cập"),
-    ROLE_NOT_FOUND(404, "Chức vụ không tồn tại");
+    ROLE_NOT_FOUND(404, "Chức vụ không tồn tại"),
+
+    INVALID_VOUCHER(400, "Vui lòng nhập giá trị từ 0 - 100 %"),
+    INVALID_NAME_VOUCHER(400, "Vui lòng nhập tên voucher 0-100 ký tự"),
+    ;
 
     private int code;
     private String message;

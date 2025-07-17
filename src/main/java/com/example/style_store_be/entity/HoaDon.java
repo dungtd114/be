@@ -10,6 +10,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Getter
@@ -83,5 +84,8 @@ public class HoaDon {
     @ManyToOne
     @JoinColumn(name = "id_khach_hang")
     private User khachHang;
+
+    @Column(name = "trang_thai_thanh_toan")
+    private Integer trangThaiThanhToan;
 
 }

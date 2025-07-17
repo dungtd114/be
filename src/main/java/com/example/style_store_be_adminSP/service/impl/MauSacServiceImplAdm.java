@@ -51,6 +51,7 @@ public class MauSacServiceImplAdm implements ICommonServiceAdm<MauSacSpAdm> {
         return mauSacSPRepository.save(object);
     }
 
+
     @Override
     public MauSacSpAdm update(MauSacSpAdm object) {
         if (object.getId() == null) {

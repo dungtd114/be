@@ -60,7 +60,7 @@ public class SanPhamWebDto {
 
     private String tenHinhAnhSp;
 
-    private String giaBanGoc;
+    private Double giaBanGoc;
 
     private Double giamGia;
 

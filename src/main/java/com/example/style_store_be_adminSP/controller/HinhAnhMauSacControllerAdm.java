@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -60,6 +61,19 @@ public class HinhAnhMauSacControllerAdm {
         HinhAnhMauSacAdm hinhAnh = hinhAnhMauSacService.getOne(id);
         return hinhAnh != null ? ResponseEntity.ok(hinhAnh) : ResponseEntity.notFound().build();
     }
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadHinhAnh(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("mauSacId") Long mauSacId) {
+
+        System.out.println("⏺ File nhận được: " + file.getOriginalFilename());
+        System.out.println("⏺ Màu sắc ID: " + mauSacId);
+
+        String filePath = hinhAnhMauSacService.uploadImage(file, mauSacId);
+        return ResponseEntity.ok(filePath);
+    }
+
+
 
 
     @PostMapping

@@ -1,7 +1,6 @@
 package com.example.style_store_be_adminSell.entity;
 
 
-import com.example.style_store_be.entity.PtThanhToan;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,7 +13,6 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Getter
 @Setter

@@ -150,6 +150,7 @@ public class HoaDonSAdmController {
         hoaDon.setTongSoLuongSp(hoaDonSAdmDto.getTongSoLuongSp());
         hoaDon.setTongTien(hoaDonSAdmDto.getTongTien());
         hoaDon.setTrangThai(1);
+        hoaDon.setMoTa(hoaDonSAdmDto.getMoTa());
         // Gán địa chỉ nhận hàng theo hình thức
         if (hoaDonSAdmDto.getHinhThucNhanHang() != null && hoaDonSAdmDto.getHinhThucNhanHang() == 0) {
             hoaDon.setTienThue(BigDecimal.ZERO);
@@ -169,6 +170,14 @@ public class HoaDonSAdmController {
         return hoaDonSAdmService.findByDayAndTrangThai(start, end);
     }
 
+    @GetMapping("/theo-ngayt")
+    public List<HoaDonSAdm> getHoaDonTheoNgay(
+            @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end
+    ) {
+        return hoaDonSAdmService.findByDay(start, end);
+    }
+
     @GetMapping("/theo-thang")
     public List<HoaDonSAdm> getHoaDonTheoThangVaTrangThai(
             @RequestParam("months") int months
@@ -177,5 +186,18 @@ public class HoaDonSAdmController {
         return hoaDonSAdmService.findByMonthsAndTrangThai(fromDate);
     }
 
+
+    @PutMapping("/delete/{id}")
+    public ResponseEntity<?> deleteHoaDonSAdm(@PathVariable Long id) {
+        int rowsAffected = hoaDonSAdmService.deleteHoaDon(id);
+
+        if (rowsAffected > 0) {
+            return ResponseEntity.ok("Xóa hóa đơn thành công");
+        } else {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("Không tìm thấy hóa đơn với id = " + id + " hoặc trạng thái khác 6");
+        }
+    }
 
 }

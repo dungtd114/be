@@ -20,12 +20,19 @@ public interface SanPhamCTSAdmService {
 
     // Lấy tất cả sản phẩm chi tiết với phân trang
     Page<SanPhamCtDTOAdm> findAll(Pageable pageable);
-
-    // Lấy danh sách sản phẩm chi tiết theo id_san_pham với phân trang
-    Page<SanPhamCtDTOAdm> findBySanPhamId(Long sanPhamId, Pageable pageable);
-
-    // Tìm sản phẩm chi tiết theo id_mau_sac
-    Page<SanPhamCtDTOAdm> findByMauSacId(Long mauSacId, Pageable pageable);
-
     SanPhamCtDTOAdm updateSoLuongSanPhamCT(Long id, Integer soLuong);
+
+    // Tìm kiếm sản phẩm chi tiết theo ma sản phẩm với phân trang
+    Page<SanPhamCtDTOAdm> searchBySanPhamMa(String ma, Pageable pageable);
+
+    Page<SanPhamCtDTOAdm> filterByAttributes(
+            Long sanPhamId,
+            String sanPhamMa,
+            String sanPhamTen,
+            Long mauSacId,
+            Long thuongHieuId,
+            Long kichThuocId,
+            Long xuatXuId,
+            Long chatLieuId,
+            Pageable pageable);
 }

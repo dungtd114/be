@@ -75,7 +75,7 @@ public class ChiTietSanPham {
     private String moTa;
 
     @Column(name = "gia_ban_goc")
-    private String giaBanGoc;
+    private Double giaBanGoc;
 
     @ManyToMany
     @JoinTable(

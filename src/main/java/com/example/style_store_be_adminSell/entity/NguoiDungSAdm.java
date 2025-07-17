@@ -1,7 +1,6 @@
 package com.example.style_store_be_adminSell.entity;
 
 
-import com.example.style_store_be.entity.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

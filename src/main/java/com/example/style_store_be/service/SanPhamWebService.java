@@ -59,4 +59,24 @@ public class SanPhamWebService {
         return ttSanPhamWebRepo.findAll(Sort.by("ngayTao").descending());
     }
 
+
+    public Page<SanPham> getPageSanPham(Pageable pageable) {
+        return ttSanPhamWebRepo.findAll(pageable);
+    }
+
+    public List<SanPhamWebDto> getListChiTietSanPham(
+            String tenSanPham,
+            Long thuongHieuId,
+            Long mauSacId,
+            Long chatLieuId,
+            Long kichThuocId,
+            Double minPrice,
+            Double maxPrice,
+            Sort sort,
+            Long sanPhamId
+    ) {
+        return sanPhamWebRepo.findByFiltersNoPaging(tenSanPham, thuongHieuId, mauSacId,
+                chatLieuId, kichThuocId, minPrice, maxPrice,
+                sanPhamId, sort);
+    }
 }

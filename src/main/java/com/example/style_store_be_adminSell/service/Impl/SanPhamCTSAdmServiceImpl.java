@@ -1,31 +1,20 @@
 package com.example.style_store_be_adminSell.service.Impl;
 
 import com.example.style_store_be_adminSP.dto.SanPhamCtDTOAdm;
-import com.example.style_store_be_adminSP.entity.HinhAnhMauSacAdm;
 import com.example.style_store_be_adminSP.entity.SanPhamCtAdm;
-import com.example.style_store_be_adminSP.reposytory.ChatLieuRepoAdm;
-import com.example.style_store_be_adminSP.reposytory.ChiTietSPRepoAdm;
-import com.example.style_store_be_adminSP.reposytory.HinhAnhRepoAdm;
-import com.example.style_store_be_adminSP.reposytory.KichThuocRepoAdm;
-import com.example.style_store_be_adminSP.reposytory.MauSacSPRepoAdm;
 import com.example.style_store_be_adminSP.reposytory.SanPhamRepoAdm;
-import com.example.style_store_be_adminSP.reposytory.ThuongHieuRepoAdm;
-import com.example.style_store_be_adminSP.reposytory.XuatXuRepoAdm;
+import com.example.style_store_be_adminSell.repository.SanPhamCTSAdmRepo;
 import com.example.style_store_be_adminSell.service.SanPhamCTSAdmService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.UUID;
-
 @Service
 public class SanPhamCTSAdmServiceImpl implements SanPhamCTSAdmService {
     @Autowired
-    private ChiTietSPRepoAdm sanPhamCtRepository;
+    private SanPhamCTSAdmRepo sanPhamCtRepository;
 
     @Autowired
     private SanPhamRepoAdm sanPhamRepository;
@@ -55,17 +44,6 @@ public class SanPhamCTSAdmServiceImpl implements SanPhamCTSAdmService {
     public Page<SanPhamCtDTOAdm> findAll(Pageable pageable) {
         return sanPhamCtRepository.findAll(pageable).map(this::mapToDTO);
     }
-
-    @Override
-    public Page<SanPhamCtDTOAdm> findBySanPhamId(Long sanPhamId, Pageable pageable) {
-        return sanPhamCtRepository.findBySanPhamId(sanPhamId, pageable).map(this::mapToDTO);
-    }
-
-    @Override
-    public Page<SanPhamCtDTOAdm> findByMauSacId(Long mauSacId, Pageable pageable) {
-        return sanPhamCtRepository.findByMauSacId(mauSacId, pageable).map(this::mapToDTO);
-    }
-
     @Override
     public SanPhamCtDTOAdm updateSoLuongSanPhamCT(Long id, Integer soLuong) {
         SanPhamCtAdm existing = sanPhamCtRepository.findById(id)
@@ -73,6 +51,39 @@ public class SanPhamCTSAdmServiceImpl implements SanPhamCTSAdmService {
         existing.setSoLuong(soLuong);
         SanPhamCtAdm saved = sanPhamCtRepository.save(existing);
         return mapToDTO(saved);
+    }
+
+    @Override
+    public Page<SanPhamCtDTOAdm> filterByAttributes(
+            Long sanPhamId,
+            String sanPhamMa,
+            String sanPhamTen,
+            Long mauSacId,
+            Long thuongHieuId,
+            Long kichThuocId,
+            Long xuatXuId,
+            Long chatLieuId,
+            Pageable pageable) {
+
+        Page<SanPhamCtAdm> result = sanPhamCtRepository.findByAttributes(
+                sanPhamId,
+                sanPhamMa,
+                sanPhamTen,
+                mauSacId,
+                thuongHieuId,
+                kichThuocId,
+                xuatXuId,
+                chatLieuId,
+                pageable
+        );
+
+        return result.map(this::mapToDTO);
+    }
+
+
+    @Override
+    public Page<SanPhamCtDTOAdm> searchBySanPhamMa(String ma, Pageable pageable) {
+        return sanPhamCtRepository.findBySanPhamMaContaining(ma, pageable).map(this::mapToDTO);
     }
 
     private SanPhamCtDTOAdm mapToDTO(SanPhamCtAdm entity) {

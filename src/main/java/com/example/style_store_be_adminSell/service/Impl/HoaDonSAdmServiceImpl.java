@@ -12,12 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Service
+@Transactional
 public class HoaDonSAdmServiceImpl implements HoaDonSAdmService {
     @Autowired
     private HoaDonSAdmRepo hoaDonSAdmRepo;
@@ -156,7 +158,7 @@ public class HoaDonSAdmServiceImpl implements HoaDonSAdmService {
         hoaDon.setNgayNhan(LocalDateTime.now());
         hoaDon.setNgayDat(LocalDateTime.now());
         hoaDon.setTongSoLuongSp(0);
-        hoaDon.setTrangThai(0);
+        hoaDon.setTrangThai(6);
 
         HoaDonSAdm hd = mapToEntity(hoaDon);
         HoaDonSAdm saved = hoaDonSAdmRepo.save(hd);
@@ -169,6 +171,11 @@ public class HoaDonSAdmServiceImpl implements HoaDonSAdmService {
     }
 
     @Override
+    public int deleteHoaDon(Long id) {
+        return hoaDonSAdmRepo.updateHoaDonTrangThai(id);
+    }
+
+    @Override
     public List<HoaDonSAdm> findByMonthsAndTrangThai(LocalDateTime fromDate) {
         List<HoaDonSAdm> list = hoaDonSAdmRepo.findHoaDonTrongThangVaTrangThai1(fromDate);
         return list.stream().toList();
@@ -177,6 +184,12 @@ public class HoaDonSAdmServiceImpl implements HoaDonSAdmService {
     @Override
     public List<HoaDonSAdm> findByDayAndTrangThai(LocalDateTime startOfDay, LocalDateTime endOfDay) {
         List<HoaDonSAdm> list = hoaDonSAdmRepo.findHoaDonNgayBDVaNgayKTAdnTrangThai1(startOfDay,endOfDay);
+        return list.stream().toList();
+    }
+
+    @Override
+    public List<HoaDonSAdm> findByDay(LocalDateTime startOfDay, LocalDateTime endOfDay) {
+        List<HoaDonSAdm> list = hoaDonSAdmRepo.findHoaDonNgayBDVaNgayKT(startOfDay,endOfDay);
         return list.stream().toList();
     }
 

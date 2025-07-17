@@ -70,4 +70,7 @@ public class GiamGia {
 
     @Column(name = "trang_thai")
     private Integer trangThai;
+
+
+
 }

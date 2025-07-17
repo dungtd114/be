@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "san_pham_ct")
@@ -73,4 +74,14 @@ public class SanPhamCtAdm {
 
     @Column(name = "mo_ta", columnDefinition = "NVARCHAR(MAX)")
     private String moTa;
+    @Column(name = "gia_ban_goc")
+    private BigDecimal giaBanGoc;
+
+    @ManyToMany
+    @JoinTable(
+            name = "giam_gia_san_pham_ct",
+            joinColumns = @JoinColumn(name = "id_san_pham_ct"),
+            inverseJoinColumns = @JoinColumn(name = "id_giam_gia")
+    )
+    private Set<GiamGia> dotGiamGias;
 }
