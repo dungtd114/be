@@ -14,7 +14,7 @@ public interface SanPhamCtServiceAdm {
     Optional<SanPhamCtDTOAdm> findByMa(String ma);
     Page<SanPhamCtDTOAdm> searchBySanPhamMa(String ma, Pageable pageable);
     Page<SanPhamCtDTOAdm> findByTrangThai(Integer trangThai, Pageable pageable);
-    Page<SanPhamCtDTOAdm> findAll(Pageable pageable);
+    Page<SanPhamCtDTOAdm> findAll(int page, int size);
     Page<SanPhamCtDTOAdm> findBySanPhamId(Long sanPhamId, Pageable pageable);
     Page<SanPhamCtDTOAdm> findByMauSacId(Long mauSacId, Pageable pageable);
     // Updated method to filter by required attributes only

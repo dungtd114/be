@@ -35,6 +35,8 @@ public class SanPhamCtDTOAdm {
 
     private BigDecimal giaBan;
 
+    private BigDecimal giaBanGoc;
+
     private Integer soLuong;
 
     private String moTa;

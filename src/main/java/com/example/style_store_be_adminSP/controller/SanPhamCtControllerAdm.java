@@ -31,8 +31,8 @@ public class SanPhamCtControllerAdm {
         if (page < 0 || size <= 0) {
             return ResponseEntity.badRequest().body(null);
         }
-        Pageable pageable = PageRequest.of(page, size);
-        Page<SanPhamCtDTOAdm> result = sanPhamCtService.findAll(pageable);
+
+        Page<SanPhamCtDTOAdm> result = sanPhamCtService.findAll(page,size);
         return ResponseEntity.ok(result);
     }
 

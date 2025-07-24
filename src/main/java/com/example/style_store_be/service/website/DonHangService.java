@@ -15,15 +15,19 @@ import com.example.style_store_be.repository.website.DonHangChiTietRepo;
 import com.example.style_store_be.repository.website.DonHangRepoSitory;
 import com.example.style_store_be.repository.website.UserRepoSitory;
 import com.itextpdf.io.font.PdfEncodings;
+import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
+import com.itextpdf.layout.borders.SolidBorder;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AccessLevel;
@@ -63,7 +67,8 @@ public class DonHangService {
         HoaDon hoaDon = donHangMapper.toHoaDon(request);
         hoaDon.setNgayDat(new Date());
         hoaDon.setNgayTao(new Date());
-        hoaDon.setTrangThai(1);
+        hoaDon.setTrangThai(0);
+        hoaDon.setTrangThaiThanhToan(0);
         if (hoaDon.getMa() == null || hoaDon.getMa().isEmpty()) {
             hoaDon.setMa("HD" + UUID.randomUUID().toString().substring(0, 10));
         }
@@ -76,7 +81,48 @@ public class DonHangService {
 
         PtThanhToan ptThanhToan = phuongThucTTRepo.findById(1L).orElseThrow(() -> new RuntimeException("Phương thức thanh toán không tồn tại"));
         hoaDon.setThanhToan(ptThanhToan);
+        Double tongTienHoaDon = request.getTongTien() - request.getTienThue();
+        hoaDon.setTongTien(tongTienHoaDon);
+        HoaDon savedHoaDon = donHangRepoSitory.save(hoaDon);
 
+        if (request.getChiTietDonHang() != null && !request.getChiTietDonHang().isEmpty()) {
+            List<HoaDonCt> hoaDonCts = request.getChiTietDonHang().stream()
+                    .map(chiTietRequest -> {
+                        HoaDonCt hoaDonCt = donHangChiTietMapper.toDonHangCt(chiTietRequest);
+                        hoaDonCt.setHoaDon(savedHoaDon);
+                        return hoaDonCt;
+                    })
+                    .collect(Collectors.toList());
+            donHangChiTietRepo.saveAll(hoaDonCts);
+        }
+
+        sendInvoiceEmail(savedHoaDon);
+        return savedHoaDon;
+    }
+
+    public HoaDon createrDonHangVNPay(DonHangRequest request, User user) {
+        HoaDon hoaDon = donHangMapper.toHoaDon(request);
+        hoaDon.setNgayDat(new Date());
+        hoaDon.setNgayTao(new Date());
+        hoaDon.setTrangThai(0); // Trạng thái đơn hàng
+        hoaDon.setTrangThaiThanhToan(1); // Đã thanh toán (VNPay thành công)
+        if (hoaDon.getMa() == null || hoaDon.getMa().isEmpty()) {
+            hoaDon.setMa("HD" + UUID.randomUUID().toString().substring(0, 10));
+        }
+
+    // String email = SecurityContextHolder.getContext().getAuthentication().getName();
+    //  User user = userRepoSitory.findByEmail(email)
+     //          .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+//        User user = userRepoSitory.findById(1L)
+//                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+        hoaDon.setKhachHang(user);
+        hoaDon.setNguoiTao(user);
+
+        PtThanhToan ptThanhToan = phuongThucTTRepo.findById(2L)
+                .orElseThrow(() -> new RuntimeException("Phương thức thanh toán VNPay không tồn tại"));
+        hoaDon.setThanhToan(ptThanhToan);
+        Double tongTienHoaDon = request.getTongTien() - request.getTienThue();
+        hoaDon.setTongTien(tongTienHoaDon);
         HoaDon savedHoaDon = donHangRepoSitory.save(hoaDon);
 
         if (request.getChiTietDonHang() != null && !request.getChiTietDonHang().isEmpty()) {
@@ -129,49 +175,98 @@ public class DonHangService {
                         PdfEncodings.IDENTITY_H
                 );
                 document.setFont(font);
-                document.setFontSize(11);
             }
 
-            // Tiêu đề
+            // Thiết lập lề và kích thước trang
+            pdfDoc.setDefaultPageSize(PageSize.A4);
+            document.setMargins(50, 50, 50, 50);
+
+            // Tiêu đề với màu sắc và logo (giả định logo là hình ảnh)
             Paragraph title = new Paragraph("HÓA ĐƠN ĐẶT HÀNG")
-                    .setFontSize(16)
+                    .setFontSize(20)
                     .setBold()
                     .setTextAlignment(TextAlignment.CENTER)
+                    .setFontColor(ColorConstants.ORANGE) // Màu cam cho tiêu đề
                     .setMarginBottom(20);
             document.add(title);
 
-            // Thông tin đơn
-            document.add(new Paragraph("Mã hóa đơn: " + hoaDon.getMa()));
-            document.add(new Paragraph("Khách hàng: " + hoaDon.getKhachHang().getHoTen()));
-            document.add(new Paragraph("Ngày đặt: " + hoaDon.getNgayDat()));
-            document.add(new Paragraph("Địa chỉ: " + hoaDon.getDiaChiNhanHang()));
-            document.add(new Paragraph("Tổng tiền: " + hoaDon.getTongTien() + " VNĐ"));
-            document.add(new Paragraph("Phí vận chuyển: " + hoaDon.getTienThue() + " VNĐ"));
+            // Thông tin công ty (giả định)
+            Paragraph companyInfo = new Paragraph("CÔNG TY TNHH SD-02\nĐịa chỉ: Cao Đẳng FPT ,Phố Trịnh Văn Bô,Quan Nam Tu Liem,Ha Noi\nSĐT: 0909 123 456\nEmail: hoa123@gmail.com")
+                    .setFontSize(10)
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginBottom(20);
+            document.add(companyInfo);
 
-            // Bảng chi tiết
+            // Thông tin đơn hàng
+            Table infoTable = new Table(UnitValue.createPercentArray(new float[]{1, 2})).useAllAvailableWidth();
+            infoTable.setMarginBottom(20);
+            infoTable.addCell(new Cell().add(new Paragraph("Mã hóa đơn:").setBold()).setPadding(5));
+            infoTable.addCell(new Cell().add(new Paragraph(hoaDon.getMa())).setPadding(5));
+            infoTable.addCell(new Cell().add(new Paragraph("Khách hàng:").setBold()).setPadding(5));
+            infoTable.addCell(new Cell().add(new Paragraph(hoaDon.getKhachHang().getHoTen())).setPadding(5));
+            infoTable.addCell(new Cell().add(new Paragraph("Ngày đặt:").setBold()).setPadding(5));
+            infoTable.addCell(new Cell().add(new Paragraph(hoaDon.getNguoiDatHang())).setPadding(5));
+            infoTable.addCell(new Cell().add(new Paragraph("Địa chỉ:").setBold()).setPadding(5));
+            infoTable.addCell(new Cell().add(new Paragraph(hoaDon.getDiaChiNhanHang())).setPadding(5));
+            document.add(infoTable);
+
+            // Bảng chi tiết sản phẩm với viền và màu sắc
             float[] columnWidths = {200F, 60F, 100F};
-            Table table = new Table(columnWidths);
+            Table table = new Table(UnitValue.createPointArray(columnWidths));
+            table.setWidth(UnitValue.createPercentValue(100));
             table.setMarginTop(15).setMarginBottom(20);
+            table.setBorder(new SolidBorder(1)); // Thêm viền cho bảng
 
-            table.addHeaderCell(new Cell().add(new Paragraph("Sản phẩm").setBold()));
-            table.addHeaderCell(new Cell().add(new Paragraph("Số lượng").setBold()));
-            table.addHeaderCell(new Cell().add(new Paragraph("Giá (VNĐ)").setBold()));
+            // Header bảng
+            Cell headerCell1 = new Cell().add(new Paragraph("Sản phẩm").setBold()).setBackgroundColor(ColorConstants.LIGHT_GRAY).setPadding(5);
+            Cell headerCell2 = new Cell().add(new Paragraph("Số lượng").setBold()).setBackgroundColor(ColorConstants.LIGHT_GRAY).setPadding(5);
+            Cell headerCell3 = new Cell().add(new Paragraph("Giá (VNĐ)").setBold()).setBackgroundColor(ColorConstants.LIGHT_GRAY).setPadding(5);
+            table.addHeaderCell(headerCell1);
+            table.addHeaderCell(headerCell2);
+            table.addHeaderCell(headerCell3);
 
+            // Dữ liệu chi tiết
             List<HoaDonCt> chiTietList = donHangChiTietRepo.findByHoaDon(hoaDon);
             for (HoaDonCt ct : chiTietList) {
-                table.addCell(ct.getTenSanPham());
-                table.addCell(String.valueOf(ct.getSoLuong()));
-                table.addCell(String.format("%,.0f", ct.getGiaTien()));
+                table.addCell(new Cell().add(new Paragraph(ct.getTenSanPham())).setPadding(5));
+                table.addCell(new Cell().add(new Paragraph(String.valueOf(ct.getSoLuong()))).setPadding(5));
+                table.addCell(new Cell().add(new Paragraph(String.format("%,.0f", ct.getGiaTien()))).setPadding(5));
             }
-
             document.add(table);
+
+            // Tổng cộng
+            Paragraph totalLabel = new Paragraph("Tổng tiền sản phẩm: " + String.format("%,.0f", hoaDon.getTongTien()) + " VNĐ")
+                    .setFontSize(12)
+                    .setBold()
+                    .setMarginTop(10);
+            document.add(totalLabel);
+
+            Paragraph shippingFee = new Paragraph("Phí vận chuyển: " + String.format("%,.0f", hoaDon.getTienThue()) + " VNĐ")
+                    .setFontSize(12)
+                    .setMarginTop(5);
+            document.add(shippingFee);
+
+            Double tongCong = hoaDon.getTongTien() + hoaDon.getTienThue(); // Tổng cộng bao gồm ship
+            Paragraph totalAmount = new Paragraph("Tổng cộng: " + String.format("%,.0f", tongCong) + " VNĐ")
+                    .setFontSize(14)
+                    .setBold()
+                    .setFontColor(ColorConstants.RED) // Màu đỏ cho tổng cộng
+                    .setMarginTop(10);
+            document.add(totalAmount);
+
+            // Chữ ký hoặc ghi chú (tuỳ chọn)
+            Paragraph note = new Paragraph("Cảm ơn quý khách đã mua hàng! Vui lòng kiểm tra kỹ thông tin trước khi rời đi.")
+                    .setFontSize(10)
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginTop(20);
+            document.add(note);
+
             document.close();
             return baos.toByteArray();
         } catch (Exception e) {
             throw new RuntimeException("Lỗi tạo PDF: " + e.getMessage(), e);
         }
     }
-
 
     public Page<LichSuDonHangDto> getLichSuDatHang(
             Integer trangThaiDonHang,

@@ -1,5 +1,6 @@
 package com.example.style_store_be_adminSP.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -38,4 +39,10 @@ public class MauSacSpAdm {
 
     @Column(name = "trang_thai")
     private Integer trangThai;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hinh_anh_mau_sac_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private HinhAnhMauSacAdm hinhAnhMauSac;
+
+
 }

@@ -61,7 +61,7 @@ public class HoaDonCTSAdmServiceImpl implements HoaDonCTSAdmService {
             dto.setSanPhamCTId(entity.getSanPhamCt().getId());
             dto.setMaSanPhamCtAdm(entity.getSanPhamCt().getMa());
             dto.setTenSanPham(entity.getTenSanPham());
-
+            dto.setGiaGocSP(entity.getSanPhamCt().getGiaBanGoc());
         }
 
         dto.setGiaTien(entity.getGiaTien());

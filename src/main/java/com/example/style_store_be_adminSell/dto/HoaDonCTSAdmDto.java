@@ -40,5 +40,6 @@ public class HoaDonCTSAdmDto {
     private Integer trangThai;
 
     private Integer soLuongSP;
-    private BigDecimal giaTienSP;
+
+    private BigDecimal giaGocSP;
 }

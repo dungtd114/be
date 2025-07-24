@@ -44,9 +44,13 @@ public class SercurityConfig {
             "/api/hoa-don/**",
             "/api/admin/nguoi-dung/**",
             "/admin/giam-gia/**",
+
             "/api/admin/thong-ke/**",
             "/api/thong-ke/**",
-            "/api/admin/san-pham-ct/**"
+            "/api/admin/san-pham-ct/**",
+
+            "/api/vnpay/**"
+
 
     };
 

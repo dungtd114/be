@@ -1,5 +1,6 @@
 package com.example.style_store_be_adminSP.reposytory;
 
+import com.example.style_store_be_adminSP.entity.SanPhamAdm;
 import com.example.style_store_be_adminSP.entity.SanPhamCtAdm;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +13,8 @@ import java.util.Optional;
 public interface ChiTietSPRepoAdm extends JpaRepository<SanPhamCtAdm, Long> {
     // Find by product code
     Optional<SanPhamCtAdm> findByMa(String ma);
+    Page<SanPhamCtAdm> findAllByOrderByNgayTaoDesc(Pageable pageable);
+    Page<SanPhamCtAdm> findBySanPhamIdOrderByNgayTaoDesc(Long sanPhamId, Pageable pageable);
 
     // Check existence by product code
     boolean existsByMa(String ma);

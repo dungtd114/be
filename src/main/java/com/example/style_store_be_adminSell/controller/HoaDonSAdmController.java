@@ -149,7 +149,7 @@ public class HoaDonSAdmController {
         hoaDon.setThanhToan(pttt);
         hoaDon.setTongSoLuongSp(hoaDonSAdmDto.getTongSoLuongSp());
         hoaDon.setTongTien(hoaDonSAdmDto.getTongTien());
-        hoaDon.setTrangThai(1);
+        hoaDon.setTrangThai(3);
         hoaDon.setMoTa(hoaDonSAdmDto.getMoTa());
         // Gán địa chỉ nhận hàng theo hình thức
         if (hoaDonSAdmDto.getHinhThucNhanHang() != null && hoaDonSAdmDto.getHinhThucNhanHang() == 0) {

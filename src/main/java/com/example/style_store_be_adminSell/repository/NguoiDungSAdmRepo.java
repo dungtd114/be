@@ -6,5 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface NguoiDungSAdmRepo extends JpaRepository<NguoiDungSAdm, Long> {
-    Optional<NguoiDungSAdm> findBySoDienThoaiAndChucVuId(String soDienThoai,Long chucVuId);
+    Optional<NguoiDungSAdm> findBySoDienThoaiAndIdChucVu(String soDienThoai,Long chucVuId);
+    NguoiDungSAdm findBySoDienThoai(String soDienThoai);
+
+    NguoiDungSAdm searchNguoiDungSAdmBySoDienThoai(String soDienThoai);
 }

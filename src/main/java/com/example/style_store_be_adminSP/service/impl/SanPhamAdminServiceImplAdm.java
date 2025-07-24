@@ -100,7 +100,7 @@ public class SanPhamAdminServiceImplAdm implements ICommonServiceAdm<SanPhamAdm>
         long totalQuantity = sanPhamWithQuantity.map(SanPhamWithQuantity::getTotalQuantity).orElse(0L);
         if (totalQuantity == 0) {
             existing.setTrangThai(0); // Đặt trạng thái Hết Hàng nếu số lượng = 0
-            existing.setNgayXoa(LocalDateTime.now());
+//            existing.setNgayXoa(LocalDateTime.now());
             sanPhamAdminRepository.save(existing);
             throw new SanPhamException("Không thể chuyển đổi trạng thái sản phẩm vì số lượng bằng 0 (Hết Hàng)");
         }

@@ -1,6 +1,6 @@
 package com.example.style_store_be_adminThongKe.entity;
 
-import com.example.style_store_be_adminSell.entity.ChucVu;
+import com.example.style_store_be_adminSell.entity.ChucVuSAdm;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -16,7 +16,7 @@ public class NguoiDungTK {
 
     @ManyToOne
     @JoinColumn(name = "id_chuc_vu", nullable = false)
-    private ChucVu chucVu;
+    private ChucVuSAdm chucVu;
 
     @Column(name = "ma", length = 20, nullable = false)
     private String ma;

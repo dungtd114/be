@@ -62,15 +62,23 @@ public class HinhAnhMauSacControllerAdm {
         return hinhAnh != null ? ResponseEntity.ok(hinhAnh) : ResponseEntity.notFound().build();
     }
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadHinhAnh(
+    public ResponseEntity<HinhAnhMauSacDTOAdm> uploadHinhAnh(
             @RequestParam("file") MultipartFile file,
             @RequestParam("mauSacId") Long mauSacId) {
 
-        System.out.println("⏺ File nhận được: " + file.getOriginalFilename());
-        System.out.println("⏺ Màu sắc ID: " + mauSacId);
+        String fileName = hinhAnhMauSacService.uploadImage(file, mauSacId);
 
-        String filePath = hinhAnhMauSacService.uploadImage(file, mauSacId);
-        return ResponseEntity.ok(filePath);
+        // Truy vấn lại ảnh vừa upload
+        List<HinhAnhMauSacAdm> list = hinhAnhMauSacService.getByMauSacId(mauSacId);
+        HinhAnhMauSacAdm last = list.get(list.size() - 1); // lấy ảnh mới nhất
+
+        HinhAnhMauSacDTOAdm dto = new HinhAnhMauSacDTOAdm();
+        dto.setId(last.getId());
+        dto.setHinhAnh(last.getHinhAnh());
+        dto.setMauSacId(mauSacId);
+        dto.setTenMauSac(last.getMauSac().getTen());
+
+        return ResponseEntity.ok(dto);
     }
 
 

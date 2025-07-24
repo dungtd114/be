@@ -46,8 +46,8 @@
 //}
 package com.example.style_store_be_adminHD.Controller;
 
-
 import com.example.style_store_be_adminHD.Dto.HoaDonAdmDto;
+import com.example.style_store_be_adminHD.Entity.HoaDonAdm;
 import com.example.style_store_be_adminHD.Service.HoaDonAdmService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -73,8 +73,8 @@ public class HoaDonAdmController {
     // Lấy danh sách tất cả hóa đơn với phân trang
     @GetMapping
     public ResponseEntity<Page<HoaDonAdmDto>> getAllDto(
-            @RequestParam(defaultValue = "0") int page, // Số trang, mặc định là 0
-            @RequestParam(defaultValue = "5") int size  // Số bản ghi mỗi trang, mặc định là 5
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size); // Tạo đối tượng Pageable
         return ResponseEntity.ok(hoaDonService.getAllDto(pageable)); // Trả về danh sách phân trang

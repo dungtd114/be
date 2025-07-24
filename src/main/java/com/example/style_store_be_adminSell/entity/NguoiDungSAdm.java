@@ -3,6 +3,8 @@ package com.example.style_store_be_adminSell.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -25,6 +27,7 @@ import java.util.Date;
 public class NguoiDungSAdm {
     @Id
     @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
 
@@ -68,10 +71,19 @@ public class NguoiDungSAdm {
 
     @Column(name = "ngay_xoa")
     private Date ngayXoa;
+
     @Column(name = "trang_thai", nullable = false)
     private Integer trangThai ;
 
-    @ManyToOne()
-    @JoinColumn(name = "id_chuc_vu")
-    private ChucVu chucVu;
+    @Column(name = "tinh")
+    private String tinh;
+
+    @Column(name = "huyen")
+    private String huyen;
+
+    @Column(name = "xa")
+    private String xa;
+
+    @Column(name = "id_chuc_vu")
+    private Long idChucVu;
 }

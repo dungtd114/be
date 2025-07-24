@@ -7,6 +7,7 @@ import com.example.style_store_be_adminSP.reposytory.*;
 import com.example.style_store_be_adminSP.service.SanPhamCtServiceAdm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -193,13 +194,15 @@ public class SanPhamCtServiceImplAdm implements SanPhamCtServiceAdm {
     }
 
     @Override
-    public Page<SanPhamCtDTOAdm> findAll(Pageable pageable) {
-        return sanPhamCtRepository.findAll(pageable).map(this::mapToDTO);
+    public Page<SanPhamCtDTOAdm> findAll(int page, int size) {
+//        return sanPhamCtRepository.findAll(pageable).map(this::mapToDTO);
+        Pageable pageable = PageRequest.of(page, size);
+        return sanPhamCtRepository.findAllByOrderByNgayTaoDesc(pageable).map(this::mapToDTO);
     }
 
     @Override
     public Page<SanPhamCtDTOAdm> findBySanPhamId(Long sanPhamId, Pageable pageable) {
-        return sanPhamCtRepository.findBySanPhamId(sanPhamId, pageable).map(this::mapToDTO);
+        return sanPhamCtRepository.findBySanPhamIdOrderByNgayTaoDesc(sanPhamId, pageable).map(this::mapToDTO);
     }
 
     @Override

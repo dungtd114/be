@@ -2,7 +2,9 @@ package com.example.style_store_be_adminSP.service.impl;
 
 import com.example.style_store_be.entity.MauSacSp;
 import com.example.style_store_be_adminSP.entity.HinhAnhMauSacAdm;
+import com.example.style_store_be_adminSP.entity.MauSacSpAdm;
 import com.example.style_store_be_adminSP.reposytory.HinhAnhRepoAdm;
+import com.example.style_store_be_adminSP.reposytory.MauSacSPRepoAdm;
 import com.example.style_store_be_adminSP.service.HinhAnhMauSacServiceAdm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +29,9 @@ public class HinhAnhMauSacServiceImplAdm implements HinhAnhMauSacServiceAdm {
 
     @Autowired
     private HinhAnhRepoAdm repository;
+    @Autowired
+    private MauSacSPRepoAdm mauSacRepo;
+
 
     @Value("${upload.dir:D:/DATN/style-store-be/src/uploads}")
     private String uploadDir;
@@ -155,7 +160,10 @@ public class HinhAnhMauSacServiceImplAdm implements HinhAnhMauSacServiceAdm {
             throw new IllegalArgumentException("File vượt quá kích thước cho phép");
         }
 
-        String extension = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")).toLowerCase();
+        String extension = file.getOriginalFilename()
+                .substring(file.getOriginalFilename().lastIndexOf("."))
+                .toLowerCase();
+
         if (!Arrays.asList(".jpg", ".jpeg", ".png").contains(extension)) {
             throw new IllegalArgumentException("Định dạng file không được hỗ trợ");
         }
@@ -174,35 +182,41 @@ public class HinhAnhMauSacServiceImplAdm implements HinhAnhMauSacServiceAdm {
             String baseName = originalFilename.substring(0, originalFilename.lastIndexOf("."));
             String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
             String uniqueFileName = originalFilename;
-
             File dest = new File(uploadDir + File.separator + uniqueFileName);
-            int count = 1;
-            while (dest.exists()) {
-                uniqueFileName = baseName + "_" + count + fileExtension;
-                dest = new File(uploadDir + File.separator + uniqueFileName);
-                count++;
+
+            if (!dest.exists()) {
+                file.transferTo(dest); // chỉ lưu nếu chưa tồn tại
+            } else {
+                logger.info("File đã tồn tại, dùng lại: {}", uniqueFileName);
             }
 
-            file.transferTo(dest);
 
+            // ✅ Lưu vào bảng hình ảnh màu sắc
             HinhAnhMauSacAdm entity = new HinhAnhMauSacAdm();
-            entity.setHinhAnh(uniqueFileName); // Lưu tên file gốc, không thêm /uploads/
+            entity.setHinhAnh(uniqueFileName);
             entity.setNgayTao(LocalDateTime.now());
             entity.setTrangThai(1);
 
-            MauSacSp mauSac = new MauSacSp();
-            mauSac.setId(mauSacId);
-            entity.setMauSac(mauSac);
+            MauSacSp mauSacRef = new MauSacSp(); // chỉ cần set id
+            mauSacRef.setId(mauSacId);
+            entity.setMauSac(mauSacRef);
 
             repository.save(entity);
             logger.info("Tải lên thành công file: {}", uniqueFileName);
+            // ✅ GÁN ảnh này vào bảng màu sắc làm ảnh chính
+            MauSacSpAdm mauSac = mauSacRepo.findById(mauSacId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy màu sắc với ID: " + mauSacId));
+            mauSac.setHinhAnhMauSac(entity); // Gán ảnh đại diện
+            mauSacRepo.save(mauSac);
 
             return uniqueFileName;
+
         } catch (IOException e) {
             logger.error("Lỗi khi lưu file: {}", e.getMessage());
             throw new RuntimeException("Lỗi khi lưu file: " + e.getMessage());
         }
     }
+
 }
 
 // Ngoại lệ tùy chỉnh

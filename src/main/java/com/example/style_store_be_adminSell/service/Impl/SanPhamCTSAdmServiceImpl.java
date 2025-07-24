@@ -99,6 +99,7 @@ public class SanPhamCTSAdmServiceImpl implements SanPhamCTSAdmService {
         dto.setMa(entity.getMa());
         dto.setGiaNhap(entity.getGiaNhap());
         dto.setGiaBan(entity.getGiaBan());
+        dto.setGiaBanGoc(entity.getGiaBanGoc());
         dto.setSoLuong(entity.getSoLuong());
         dto.setMoTa(entity.getMoTa());
         dto.setTrangThai(entity.getTrangThai());

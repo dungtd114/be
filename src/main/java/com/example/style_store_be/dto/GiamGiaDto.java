@@ -25,5 +25,21 @@ public class GiamGiaDto {
 
     private Date ngayKetThuc;
 
+    private Double dieuKienGiam;
+
     private Integer trangThai;
+
+    private Double giamToiDa;
+
+    private Integer idGiamGiaSanPhamCt;
+
+    public GiamGiaDto(Long id, String ma, String tenDotGiam, Double giamGia, Date ngayBatDau, Date ngayKetThuc, Integer trangThai) {
+        this.id = id;
+        this.ma = ma;
+        this.tenDotGiam = tenDotGiam;
+        this.giamGia = giamGia;
+        this.ngayBatDau = ngayBatDau;
+        this.ngayKetThuc = ngayKetThuc;
+        this.trangThai = trangThai;
+    }
 }
