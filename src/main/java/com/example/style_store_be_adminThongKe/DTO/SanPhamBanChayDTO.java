@@ -1,14 +1,10 @@
 package com.example.style_store_be_adminThongKe.DTO;
 
-import lombok.Data;
+public interface SanPhamBanChayDTO {
+    String getTenSanPhamTK();
+    String getMaSanPhamCtTK();
+    Integer getTongSoLuongBanTK();
+    Double getTongTienBanTK();
+    String getUrlHinhAnhMauSac();
 
-@Data
-public class SanPhamBanChayDTO {
-    private String maSanPham;
-    private String tenSanPham;
-    private String mauSac;
-    private String thuongHieu;
-    private String kichThuoc;
-    private Integer tongSoLuongBan;
-    private Double tongDoanhThu;
 }

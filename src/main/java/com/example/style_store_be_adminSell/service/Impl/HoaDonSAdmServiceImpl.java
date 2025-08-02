@@ -1,9 +1,12 @@
 package com.example.style_store_be_adminSell.service.Impl;
 
-import com.example.style_store_be_adminSP.entity.SanPhamAdm;
+
 import com.example.style_store_be_adminSell.dto.HoaDonSAdmDto;
+import com.example.style_store_be_adminSell.entity.DiaChiNhanSAdm;
 import com.example.style_store_be_adminSell.entity.HoaDonSAdm;
 import com.example.style_store_be_adminSell.entity.NguoiDungSAdm;
+import com.example.style_store_be_adminSell.entity.PtThanhToanSAdm;
+import com.example.style_store_be_adminSell.repository.DiaChiNhanSAdmRepo;
 import com.example.style_store_be_adminSell.repository.HoaDonSAdmRepo;
 import com.example.style_store_be_adminSell.repository.NguoiDungSAdmRepo;
 import com.example.style_store_be_adminSell.repository.PtThanhToanSAdmRepo;
@@ -11,12 +14,19 @@ import com.example.style_store_be_adminSell.service.HoaDonSAdmService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Transactional
@@ -29,6 +39,9 @@ public class HoaDonSAdmServiceImpl implements HoaDonSAdmService {
 
     @Autowired
     private PtThanhToanSAdmRepo ptThanhToanSAdmRepo;
+
+    @Autowired
+    private DiaChiNhanSAdmRepo diaChiNhanSAdmRepo;
 
     private HoaDonSAdm mapToEntity(HoaDonSAdmDto dto) {
         HoaDonSAdm entity = new HoaDonSAdm();
@@ -146,8 +159,10 @@ public class HoaDonSAdmServiceImpl implements HoaDonSAdmService {
     @Override
     public HoaDonSAdmDto addHoaDon(HoaDonSAdmDto hoaDon) {
         if (hoaDon.getNguoiTaoId() == null) {
-            hoaDon.setNguoiTaoId(1L);// hoặc gán từ session nếu có
-            hoaDon.setNguoiXuatId(1L);
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            NguoiDungSAdm user = nguoiDungRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+            hoaDon.setNguoiTaoId(user.getId());// hoặc gán từ session nếu có
         }
 
         long count = hoaDonSAdmRepo.count();
@@ -191,6 +206,88 @@ public class HoaDonSAdmServiceImpl implements HoaDonSAdmService {
     public List<HoaDonSAdm> findByDay(LocalDateTime startOfDay, LocalDateTime endOfDay) {
         List<HoaDonSAdm> list = hoaDonSAdmRepo.findHoaDonNgayBDVaNgayKT(startOfDay,endOfDay);
         return list.stream().toList();
+    }
+
+    public String updateKhachHangChoHoaDon(Long hoaDonId, HoaDonSAdmDto hoaDonSAdmDto) {
+        if (hoaDonSAdmDto == null || hoaDonSAdmDto.getKhachHangId() == null) {
+            throw new IllegalArgumentException("Thiếu thông tin khách hàng");
+        }
+
+        HoaDonSAdm hoaDon = hoaDonSAdmRepo.findById(hoaDonId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hoá đơn"));
+
+        NguoiDungSAdm khachHang = nguoiDungRepository.findById(hoaDonSAdmDto.getKhachHangId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy khách hàng"));
+
+        hoaDon.setKhachHang(khachHang);
+        hoaDon.setNguoiDatHang(khachHang.getHoTen());
+
+        Integer hinhThucNhan = hoaDonSAdmDto.getHinhThucNhanHang();
+        Long diaChiNhanId = hoaDonSAdmDto.getDiaChiNhanId();
+
+        if (hinhThucNhan != null && hinhThucNhan == 0) {
+            hoaDon.setNguoiNhanHang(khachHang.getHoTen());
+            hoaDon.setDiaChiNhanHang("Tại cửa hàng");
+        } else {
+            DiaChiNhanSAdm diaChiNhan = null;
+            if (diaChiNhanId != null) {
+                diaChiNhan = diaChiNhanSAdmRepo.findById(diaChiNhanId).orElse(null);
+            }
+
+            if (diaChiNhan != null && diaChiNhan.getNguoiDungSAdm().getId().equals(khachHang.getId())) {
+                hoaDon.setNguoiNhanHang(
+                        diaChiNhan.getTenNguoiNhan() != null ? diaChiNhan.getTenNguoiNhan() : khachHang.getHoTen()
+                );
+
+                String diaChiDayDu = Stream.of(
+                        diaChiNhan.getDiaChi(),
+                        diaChiNhan.getXa(),
+                        diaChiNhan.getHuyen(),
+                        diaChiNhan.getTinh()
+                ).filter(Objects::nonNull).collect(Collectors.joining(", "));
+
+                hoaDon.setDiaChiNhanHang(diaChiDayDu);
+            } else {
+                hoaDon.setNguoiNhanHang(khachHang.getHoTen());
+                hoaDon.setDiaChiNhanHang(khachHang.getDiaChi());
+            }
+        }
+
+        hoaDonSAdmRepo.save(hoaDon);
+        return "Cập nhật khách hàng thành công";
+    }
+
+    public String capNhatThanhToanVaThongTinHoaDon(Long hoaDonId, HoaDonSAdmDto hoaDonSAdmDto) {
+        if (hoaDonSAdmDto == null || hoaDonSAdmDto.getPtThanhToanId() == null) {
+            throw new IllegalArgumentException("Thiếu thông tin thanh toán");
+        }
+
+        HoaDonSAdm hoaDon = hoaDonSAdmRepo.findById(hoaDonId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hoá đơn"));
+
+        PtThanhToanSAdm pttt = ptThanhToanSAdmRepo.findById(hoaDonSAdmDto.getPtThanhToanId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy phương thức thanh toán"));
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        NguoiDungSAdm user = nguoiDungRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+        // Cập nhật các thông tin hoá đơn
+        hoaDon.setNguoiXuat(user); // Nếu có user hiện tại, nên thay thế bằng auth
+        hoaDon.setThanhToan(pttt);
+        hoaDon.setTongSoLuongSp(hoaDonSAdmDto.getTongSoLuongSp());
+        hoaDon.setTongTien(hoaDonSAdmDto.getTongTien());
+        hoaDon.setTrangThai(3); // Có thể dùng enum hoặc hằng số để rõ nghĩa hơn
+        hoaDon.setMoTa(hoaDonSAdmDto.getMoTa());
+
+        // Gán tiền thuế theo hình thức nhận
+        if (Objects.equals(hoaDonSAdmDto.getHinhThucNhanHang(), 0)) {
+            hoaDon.setTienThue(BigDecimal.ZERO);
+        } else {
+            hoaDon.setTienThue(BigDecimal.valueOf(51));
+        }
+
+        hoaDonSAdmRepo.save(hoaDon);
+        return "Cập nhật hoá đơn thành công";
     }
 
 

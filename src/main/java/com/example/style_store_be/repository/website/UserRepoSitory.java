@@ -5,9 +5,11 @@ import com.example.style_store_be.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -51,4 +53,11 @@ public interface UserRepoSitory extends JpaRepository<User,Long> {
                                @Param("gioiTinh") Integer gioiTinh,
                                @Param("trangThai") Integer trangThai,
                                Pageable pageable);
+
+    boolean existsByEmail(String email);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE User u SET u.trangThai = 0 WHERE u.id = :id")
+    int deactivateUserById(@Param("id") Long id);
 }

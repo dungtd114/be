@@ -3,6 +3,7 @@ package com.example.style_store_be.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 @Entity
 @Table(name = "chat_lieu")
@@ -17,22 +18,22 @@ public class ChatLieu {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "ma")
+    @Column(name = "ma", columnDefinition = "NVARCHAR(20)")
     private String ma;
 
-    @Column(name = "ten")
+    @Column(name = "ten", columnDefinition = "NVARCHAR(50)")
     private String ten;
 
     @Column(name = "ngay_tao")
-    private Date ngayTao;
+    private LocalDateTime ngayTao;
 
     @Column(name = "ngay_sua")
-    private Date ngaySua;
+    private LocalDateTime ngaySua;
 
     @Column(name = "ngay_xoa")
-    private Date ngayXoa;
+    private LocalDateTime ngayXoa;
 
-    @Column(name = "mo_ta")
+    @Column(name = "mo_ta", columnDefinition = "NVARCHAR(255)")
     private String moTa;
 
     @Column(name = "trang_thai")

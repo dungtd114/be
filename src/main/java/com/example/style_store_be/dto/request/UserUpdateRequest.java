@@ -25,4 +25,7 @@ public class UserUpdateRequest {
     private String matKhau;
     private Integer trangThai;
     private Long idChucVu;
+    private String tinh;
+    private String huyen;
+    private String xa;
 }

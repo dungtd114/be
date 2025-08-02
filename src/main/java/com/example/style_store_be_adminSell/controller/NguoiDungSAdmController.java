@@ -6,6 +6,7 @@ import com.example.style_store_be_adminSell.entity.DiaChiNhanSAdm;
 import com.example.style_store_be_adminSell.entity.NguoiDungSAdm;
 import com.example.style_store_be_adminSell.repository.DiaChiNhanSAdmRepo;
 import com.example.style_store_be_adminSell.repository.NguoiDungSAdmRepo;
+import com.example.style_store_be_adminSell.service.DiaChiNhanService;
 import com.example.style_store_be_adminSell.service.NguoiDungSAdmService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -21,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @Controller
 @RestController
 @RequestMapping("/api/admin/nguoi-dung")
@@ -32,6 +35,8 @@ public class NguoiDungSAdmController {
     private DiaChiNhanSAdmRepo diaChiNhanSAdmRepo;
     @Autowired
     private NguoiDungSAdmRepo nguoiDungSAdmRepo;
+    @Autowired
+    private DiaChiNhanService diaChiNhanService;
 
     @GetMapping("/sdt/{sdt}")
     public ResponseEntity<NguoiDungSAdm> getKhachHangBySDT(@PathVariable String sdt) {
@@ -56,6 +61,7 @@ public class NguoiDungSAdmController {
         return ResponseEntity.ok(result);
     }
 
+    //Sử dụng địa chỉ nhận
     @PostMapping("/addND")
     public ResponseEntity<DiaChiNhanSAdm> themNguoiDung(@RequestBody NguoiDungDto dto) {
         DiaChiNhanSAdm diaChiNhanSAdm = nguoiDungSAdmService.addNguoiDung(dto);
@@ -67,9 +73,25 @@ public class NguoiDungSAdmController {
         if (id == null) {
             return ResponseEntity.badRequest().body(null);
         }
-        DiaChiNhanSAdm result = diaChiNhanSAdmRepo.
-                findByNguoiDungSAdm(nguoiDungSAdmRepo.findById(id).orElse(null));
+        DiaChiNhanSAdm result = diaChiNhanSAdmRepo.findById(id).orElse(null);
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/dcn/{id}")
+    public ResponseEntity<?> getDcnById(@PathVariable Long id) {
+        List<DiaChiNhanSAdm> ds = diaChiNhanSAdmRepo.findAllByNguoiDungSAdm_Id(id);
+        return ResponseEntity.ok(ds);
+    }
+
+    @PostMapping("/addDCN")
+    public ResponseEntity<?> addDCN(@RequestBody DiaChiNhanSAdm dcn) {
+        try {
+            DiaChiNhanSAdm saved = diaChiNhanService.addDiaChiNhan(dcn);
+            return ResponseEntity.ok(saved);
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Lỗi khi thêm địa chỉ nhận: " + e.getMessage());
+        }
+    }
 }

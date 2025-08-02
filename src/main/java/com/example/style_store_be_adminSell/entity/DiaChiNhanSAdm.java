@@ -48,6 +48,9 @@ public class DiaChiNhanSAdm {
     @Column(name = "dia_chi")
     private String diaChi;
 
+    @Column(name = "so_nha")
+    private String soNha;
+
     @Column(name = "ten_nguoi_nhan")
     private String tenNguoiNhan;
 

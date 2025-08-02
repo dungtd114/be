@@ -94,7 +94,7 @@ public class HoaDonAdmController {
             @RequestParam(defaultValue = "") String ma,
             @RequestParam(defaultValue = "0") int page
     ) {
-        Pageable pageable = PageRequest.of(page, 5); // Số bản ghi mỗi trang cố định là 5
+        Pageable pageable = PageRequest.of(page, 10); // Số bản ghi mỗi trang cố định là 5
         return ResponseEntity.ok(hoaDonService.searchDto(ma, pageable));
     }
 }

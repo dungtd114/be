@@ -3,6 +3,8 @@ package com.example.style_store_be.controller;
 import com.example.style_store_be.dto.UserDto;
 import com.example.style_store_be.dto.request.ApiResponse;
 import com.example.style_store_be.dto.request.UserCreationRequest;
+import com.example.style_store_be.dto.request.UserUpdateRequest;
+import com.example.style_store_be.dto.response.UserResponse;
 import com.example.style_store_be.entity.User;
 import com.example.style_store_be.service.website.UserService;
 import lombok.AccessLevel;
@@ -29,13 +31,28 @@ public class UserController {
     }
 
     @PostMapping("/them-nhan-vien")
-    ApiResponse<User> createStaff(@RequestBody UserCreationRequest request){
-        ApiResponse<User> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(userService.createStaff(request));
-        return apiResponse;
+    public ApiResponse<User> createStaff(@RequestBody UserCreationRequest request) {
+        try {
+            ApiResponse<User> apiResponse = new ApiResponse<>();
+            apiResponse.setResult(userService.createStaff(request));
+            return apiResponse;
+        } catch (Exception e) {
+            log.error("Error when creating staff: ", e);
+            throw e;
+        }
     }
 
-
+    @PostMapping("/them-khach-hang")
+    public ApiResponse<User> createrCustomer(@RequestBody UserCreationRequest request) {
+        try {
+            ApiResponse<User> apiResponse = new ApiResponse<>();
+            apiResponse.setResult(userService.createrCustomer(request));
+            return apiResponse;
+        } catch (Exception e) {
+            log.error("Error when creating staff: ", e);
+            throw e;
+        }
+    }
 
     @GetMapping("/danh-sach-nhan-vien")
     public Page<UserDto> pageStaff (@RequestParam(defaultValue = "0") int page , @RequestParam(defaultValue = "5") int size,
@@ -59,12 +76,28 @@ public class UserController {
         return userService.getPageUser(hoTenOrSoDTOrEmail, gioiTinh, trangThai, pageable);
     }
 
+    @GetMapping("/chi-tiet/{id}")
+    public ApiResponse<UserResponse> getUserDetail(@PathVariable Long id) {
+        ApiResponse<UserResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(userService.getUserDetail(id));
+        return apiResponse;
+    }
 
+    @PutMapping("/sua-thong-tin/{id}")
+    UserResponse updateUser(@PathVariable Long id, @RequestBody UserUpdateRequest request) {
+        try {
+            return userService.updateUser(id, request);
 
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
+    }
 
-
-
-
+    @DeleteMapping("/xoa-nguoi-dung/{id}")
+    public String removeNguoiDung(@PathVariable Long id) {
+        userService.removeUser(id);
+        return "Xoá nhân viên thành công";
+    }
 
 }

@@ -1,40 +1,75 @@
 package com.example.style_store_be_adminThongKe.reposytory;
 
+import com.example.style_store_be_adminThongKe.DTO.SanPhamBanChayDTO;
 import com.example.style_store_be_adminThongKe.entity.HoaDonTK;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface HoaDonTkRepo extends JpaRepository<HoaDonTK, Long> {
 
-    @Query(value = "SELECT CONVERT(VARCHAR(10), h.ngay_dat, 120) AS ngay, SUM(h.tong_tien) AS tongDoanhThu " +
-            "FROM hoa_don h WHERE h.trang_thai = 1 " +
-            "GROUP BY CONVERT(VARCHAR(10), h.ngay_dat, 120) " +
-            "ORDER BY ngay DESC", nativeQuery = true)
-    List<Object[]> thongKeDoanhThuTheoNgay();
+    // Thống kê theo tháng - năm
+    @Query(value = """
+        SELECT 
+            sp.ten AS tenSanPhamTK,
+            spct.ma AS maSanPhamCtTK,
+            SUM(hdct.so_luong) AS tongSoLuongBanTK,
+            SUM(hdct.thanh_tien) AS tongTienBanTK,
+            hams.hinh_anh AS urlHinhAnhMauSac
+        FROM hoa_don_ct hdct
+        JOIN hoa_don hd ON hd.id = hdct.id_hoa_don
+        JOIN san_pham_ct spct ON spct.id = hdct.id_san_pham_ct
+        JOIN san_pham sp ON sp.id = spct.id_san_pham
+        LEFT JOIN hinh_anh_mau_sac hams ON spct.id_hinh_anh_mau_sac = hams.id
+        WHERE hd.trang_thai = 3
+          AND MONTH(hd.ngay_dat) = ?1
+          AND YEAR(hd.ngay_dat) = ?2
+        GROUP BY sp.ten, spct.ma, hams.hinh_anh
+        ORDER BY tongSoLuongBanTK DESC
+    """, nativeQuery = true)
+    List<SanPhamBanChayDTO> thongKeTheoThang(int thang, int nam);
 
-    @Query(value = "SELECT CONVERT(VARCHAR(10), h.ngay_dat, 120) AS ngay, SUM(h.tong_tien) AS tongDoanhThu " +
-            "FROM hoa_don h WHERE h.trang_thai = 1 AND CONVERT(VARCHAR(10), h.ngay_dat, 120) = :date " +
-            "GROUP BY CONVERT(VARCHAR(10), h.ngay_dat, 120)", nativeQuery = true)
-    List<Object[]> thongKeDoanhThuTheoNgay(@Param("date") String date);
+    // Thống kê theo năm
+    @Query(value = """
+        SELECT 
+            sp.ten AS tenSanPhamTK,
+            spct.ma AS maSanPhamCtTK,
+            SUM(hdct.so_luong) AS tongSoLuongBanTK,
+            SUM(hdct.thanh_tien) AS tongTienBanTK,
+            hams.hinh_anh AS urlHinhAnhMauSac
+        FROM hoa_don_ct hdct
+        JOIN hoa_don hd ON hd.id = hdct.id_hoa_don
+        JOIN san_pham_ct spct ON spct.id = hdct.id_san_pham_ct
+        JOIN san_pham sp ON sp.id = spct.id_san_pham
+        LEFT JOIN hinh_anh_mau_sac hams ON spct.id_hinh_anh_mau_sac = hams.id
+        WHERE hd.trang_thai = 3
+          AND YEAR(hd.ngay_dat) = ?1
+        GROUP BY sp.ten, spct.ma, hams.hinh_anh
+        ORDER BY tongSoLuongBanTK DESC
+    """, nativeQuery = true)
+    List<SanPhamBanChayDTO> thongKeTheoNam(int nam);
 
-    @Query(value = "SELECT YEAR(h.ngay_dat) AS nam, DATEPART(WEEK, h.ngay_dat) AS tuan, SUM(h.tong_tien) AS tongDoanhThu " +
-            "FROM hoa_don h WHERE h.trang_thai = 1 " +
-            "GROUP BY YEAR(h.ngay_dat), DATEPART(WEEK, h.ngay_dat) " +
-            "ORDER BY nam DESC, tuan DESC", nativeQuery = true)
-    List<Object[]> thongKeDoanhThuTheoTuan();
-
-    @Query(value = "SELECT YEAR(h.ngay_dat) AS nam, MONTH(h.ngay_dat) AS thang, SUM(h.tong_tien) AS tongDoanhThu " +
-            "FROM hoa_don h WHERE h.trang_thai = 1 " +
-            "GROUP BY YEAR(h.ngay_dat), MONTH(h.ngay_dat) " +
-            "ORDER BY nam DESC, thang DESC", nativeQuery = true)
-    List<Object[]> thongKeDoanhThuTheoThang();
-
-    @Query(value = "SELECT YEAR(h.ngay_dat) AS nam, SUM(h.tong_tien) AS tongDoanhThu " +
-            "FROM hoa_don h WHERE h.trang_thai = 1 " +
-            "GROUP BY YEAR(h.ngay_dat) " +
-            "ORDER BY nam DESC", nativeQuery = true)
-    List<Object[]> thongKeDoanhThuTheoNam();
+    // Thống kê theo tuần - năm
+    @Query(value = """
+        SELECT 
+            sp.ten AS tenSanPhamTK,
+            spct.ma AS maSanPhamCtTK,
+            SUM(hdct.so_luong) AS tongSoLuongBanTK,
+            SUM(hdct.thanh_tien) AS tongTienBanTK,
+            hams.hinh_anh AS urlHinhAnhMauSac
+        FROM hoa_don_ct hdct
+        JOIN hoa_don hd ON hd.id = hdct.id_hoa_don
+        JOIN san_pham_ct spct ON spct.id = hdct.id_san_pham_ct
+        JOIN san_pham sp ON sp.id = spct.id_san_pham
+        LEFT JOIN hinh_anh_mau_sac hams ON spct.id_hinh_anh_mau_sac = hams.id
+        WHERE hd.trang_thai = 3
+          AND DATEPART(WEEK, hd.ngay_dat) = ?1
+          AND YEAR(hd.ngay_dat) = ?2
+        GROUP BY sp.ten, spct.ma, hams.hinh_anh
+        ORDER BY tongSoLuongBanTK DESC
+    """, nativeQuery = true)
+    List<SanPhamBanChayDTO> thongKeTheoTuan(int tuan, int nam);
 }

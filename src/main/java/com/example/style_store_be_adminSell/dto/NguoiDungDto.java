@@ -39,6 +39,7 @@ public class NguoiDungDto {
         private String maDiaChi;
         private String tenNguoiNhan;
         private String soDienThoaiNhan;
+        private String soNhaNhan;
         private String diaChiNhan;
         private String tinhNhan;
         private String huyenNhan;

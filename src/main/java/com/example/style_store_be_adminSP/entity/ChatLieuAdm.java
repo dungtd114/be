@@ -15,10 +15,10 @@ public class ChatLieuAdm {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "ma")
+    @Column(name = "ma", columnDefinition = "NVARCHAR(20)")
     private String ma;
 
-    @Column(name = "ten")
+    @Column(name = "ten", columnDefinition = "NVARCHAR(50)")
     private String ten;
 
     @Column(name = "ngay_tao")
@@ -30,7 +30,7 @@ public class ChatLieuAdm {
     @Column(name = "ngay_xoa")
     private LocalDateTime ngayXoa;
 
-    @Column(name = "mo_ta")
+    @Column(name = "mo_ta", columnDefinition = "NVARCHAR(255)")
     private String moTa;
 
     @Column(name = "trang_thai")

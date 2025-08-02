@@ -31,6 +31,7 @@ public class HoaDonSAdmDto {
 
     private String nguoiDatHang;
 
+    private Long diaChiNhanId;
     private String nguoiNhanHang;
 
     private String diaChiNhanHang;

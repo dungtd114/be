@@ -24,9 +24,32 @@ public class UserResponse {
     private Integer gioiTinh;
     private Date namSinh;
     private String tenDangNhap;
+    private String matKhau;
     private Date ngayTao;
     private Date ngaySua;
     private Date ngayXoa;
     private Integer trangThai;
     private Long idChucVu;
+    private String tinh;
+    private String huyen;
+    private String xa;
+
+    public UserResponse(Long id, String ma, String hoTen, String soDienThoai, String email, String cccd, String diaChi, Integer gioiTinh, Date namSinh, String tenDangNhap, String matKhau, Date ngayTao, Date ngaySua, Date ngayXoa, Integer trangThai, Long idChucVu) {
+        this.id = id;
+        this.ma = ma;
+        this.hoTen = hoTen;
+        this.soDienThoai = soDienThoai;
+        this.email = email;
+        this.cccd = cccd;
+        this.diaChi = diaChi;
+        this.gioiTinh = gioiTinh;
+        this.namSinh = namSinh;
+        this.tenDangNhap = tenDangNhap;
+        this.matKhau = matKhau;
+        this.ngayTao = ngayTao;
+        this.ngaySua = ngaySua;
+        this.ngayXoa = ngayXoa;
+        this.trangThai = trangThai;
+        this.idChucVu = idChucVu;
+    }
 }

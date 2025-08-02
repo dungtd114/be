@@ -64,4 +64,15 @@ public class User {
     @ManyToOne()
     @JoinColumn(name = "id_chuc_vu")
     private Role role;
+
+
+
+    @Column(name = "tinh")
+    private String tinh;
+
+    @Column(name = "huyen")
+    private String huyen;
+
+    @Column(name = "xa")
+    private String xa;
 }
