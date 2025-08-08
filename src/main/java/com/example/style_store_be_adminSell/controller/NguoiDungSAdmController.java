@@ -94,4 +94,17 @@ public class NguoiDungSAdmController {
                     .body("Lỗi khi thêm địa chỉ nhận: " + e.getMessage());
         }
     }
+    @GetMapping("/email/{email}")
+    public ResponseEntity<NguoiDungSAdm> getKhachHangByEmail(@PathVariable String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        try {
+            NguoiDungSAdm nguoiDung = nguoiDungSAdmRepo.findByEmail(email).orElse(null);
+            return ResponseEntity.ok(nguoiDung);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

@@ -11,4 +11,6 @@ public interface NguoiDungSAdmRepo extends JpaRepository<NguoiDungSAdm, Long> {
     NguoiDungSAdm findBySoDienThoai(String soDienThoai);
     Optional<NguoiDungSAdm> findByEmail(String email);
     NguoiDungSAdm searchNguoiDungSAdmBySoDienThoai(String soDienThoai);
+    boolean existsByEmail(String email);
+
 }

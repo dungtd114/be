@@ -118,55 +118,6 @@ public class HoaDonSAdmController {
 
     @PutMapping("/updateKH/{id}")
     public ResponseEntity<?> updateHDWithKH(@PathVariable Long id, @RequestBody HoaDonSAdmDto hoaDonSAdmDto) {
-//        if (hoaDonSAdmDto == null || hoaDonSAdmDto.getKhachHangId() == null) {
-//            return ResponseEntity.badRequest().body("Thiếu thông tin khách hàng");
-//        }
-//
-//        HoaDonSAdm hoaDon = hoaDonSAdmRepo.findById(id)
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hoá đơn"));
-//
-//        NguoiDungSAdm khachHang = nguoiDungSAdmRepo.findById(hoaDonSAdmDto.getKhachHangId()).orElse(null);
-//        hoaDon.setKhachHang(khachHang);
-//        hoaDon.setNguoiDatHang(khachHang.getHoTen());
-//
-//        // Gán thông tin nhận hàng
-//        Integer hinhThucNhan = hoaDonSAdmDto.getHinhThucNhanHang();
-//        Long diaChiNhanId = hoaDonSAdmDto.getDiaChiNhanId();
-//
-//        if (hinhThucNhan != null && hinhThucNhan == 0) {
-//            // Nhận tại cửa hàng
-//            hoaDon.setNguoiNhanHang(khachHang.getHoTen());
-//            hoaDon.setDiaChiNhanHang("Tại cửa hàng");
-//        } else {
-//            // Nhận tại địa chỉ
-//            DiaChiNhanSAdm diaChiNhan = null;
-//            if (diaChiNhanId != null) {
-//                diaChiNhan = diaChiNhanSAdmRepo.findById(diaChiNhanId).orElse(null);
-//            }
-//
-//            if (diaChiNhan != null && diaChiNhan.getNguoiDungSAdm().getId().equals(khachHang.getId())) {
-//                // Có địa chỉ nhận được chọn
-//                hoaDon.setNguoiNhanHang(
-//                        diaChiNhan.getTenNguoiNhan() != null ? diaChiNhan.getTenNguoiNhan() : khachHang.getHoTen()
-//                );
-//
-//                String diaChiDayDu = Stream.of(
-//                        diaChiNhan.getDiaChi(),
-//                        diaChiNhan.getXa(),
-//                        diaChiNhan.getHuyen(),
-//                        diaChiNhan.getTinh()
-//                ).filter(Objects::nonNull).collect(Collectors.joining(", "));
-//
-//                hoaDon.setDiaChiNhanHang(diaChiDayDu);
-//            } else {
-//                // Không có địa chỉ cụ thể
-//                hoaDon.setNguoiNhanHang(khachHang.getHoTen());
-//                hoaDon.setDiaChiNhanHang(khachHang.getDiaChi());
-//            }
-//        }
-//
-//        hoaDonSAdmRepo.save(hoaDon);
-//        return ResponseEntity.ok("Cập nhật khách hàng thành công");
         try {
             String result = hoaDonSAdmService.updateKhachHangChoHoaDon(id, hoaDonSAdmDto);
             return ResponseEntity.ok(result);
@@ -182,29 +133,6 @@ public class HoaDonSAdmController {
 
     @PutMapping("/updateHD/{id}")
     public ResponseEntity<?> updateHDWithNull(@PathVariable Long id, @RequestBody HoaDonSAdmDto hoaDonSAdmDto) {
-//        if (hoaDonSAdmDto == null || hoaDonSAdmDto.getPtThanhToanId() == null) {
-//            return ResponseEntity.badRequest().body("Thiếu thông tin thanh toán");
-//        }
-//        HoaDonSAdm hoaDon = hoaDonSAdmRepo.findById(id)
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hoá đơn"));
-//
-//        PtThanhToanSAdm pttt = ptThanhToanSAdmRepo.findById(hoaDonSAdmDto.getPtThanhToanId()).orElse(null);
-//
-//        hoaDon.setNguoiXuat(nguoiDungSAdmRepo.findById(1L).orElse(null));
-//        hoaDon.setThanhToan(pttt);
-//        hoaDon.setTongSoLuongSp(hoaDonSAdmDto.getTongSoLuongSp());
-//        hoaDon.setTongTien(hoaDonSAdmDto.getTongTien());
-//        hoaDon.setTrangThai(3);
-//        hoaDon.setMoTa(hoaDonSAdmDto.getMoTa());
-//        // Gán địa chỉ nhận hàng theo hình thức
-//        if (hoaDonSAdmDto.getHinhThucNhanHang() != null && hoaDonSAdmDto.getHinhThucNhanHang() == 0) {
-//            hoaDon.setTienThue(BigDecimal.ZERO);
-//        } else {
-//            hoaDon.setTienThue(BigDecimal.valueOf(51));
-//        }
-//
-//        hoaDonSAdmRepo.save(hoaDon);
-//        return ResponseEntity.ok("Cập nhật khách hàng thành công");
         try {
             String result = hoaDonSAdmService.capNhatThanhToanVaThongTinHoaDon(id, hoaDonSAdmDto);
             return ResponseEntity.ok(result);
