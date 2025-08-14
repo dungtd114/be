@@ -4,11 +4,15 @@ package com.example.style_store_be_adminSell.service.Impl;
 import com.example.style_store_be.entity.User;
 import com.example.style_store_be.exception.AppException;
 import com.example.style_store_be.exception.Errorcode;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.example.style_store_be_adminSell.dto.NguoiDungDto;
 import com.example.style_store_be_adminSell.entity.DiaChiNhanSAdm;
@@ -20,7 +24,7 @@ import com.example.style_store_be_adminSell.service.NguoiDungSAdmService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
+import com.example.style_store_be.service.website.UserService;
 import java.util.Date;
 import java.util.UUID;
 
@@ -35,6 +39,7 @@ public class NguoiDungSAdmServiceImpl implements NguoiDungSAdmService {
     @Autowired
     private DiaChiNhanSAdmRepo diaChiNhanSAdmRepo;
 
+    JavaMailSender javaMailSender;
     PasswordEncoder passwordEncoder;
 
     private NguoiDungSAdm mapToNguoiDungEntity(NguoiDungDto dto) {
@@ -119,23 +124,78 @@ public class NguoiDungSAdmServiceImpl implements NguoiDungSAdmService {
 
     @Override
     public DiaChiNhanSAdm addNguoiDung(NguoiDungDto dto) {
-         if (nguoiDungSAdmRepo.existsByEmail(dto.getEmail()))
-            throw new AppException(Errorcode.USER_EXISTED);
+        if (nguoiDungSAdmRepo.existsByEmail(dto.getEmail()))
+            throw new AppException(Errorcode.EMAIL_EXISTED);
 
         NguoiDungSAdm nguoiDung = mapToNguoiDungEntity(dto);
-        nguoiDung.setMa("nv" + UUID.randomUUID().toString().substring(0,10));
-        String rawPassword = "ph" + UUID.randomUUID().toString().substring(0,10);
+        nguoiDung.setMa("nv" + UUID.randomUUID().toString().substring(0, 10));
+        String rawPassword = "ph" + UUID.randomUUID().toString().substring(0, 10);
         nguoiDung.setMatKhau(passwordEncoder.encode(rawPassword));
-        nguoiDung.setTenDangNhap(rawPassword);
+        nguoiDung.setTenDangNhap(dto.getEmail());
+
+        // Lưu người dùng trước
         nguoiDungSAdmRepo.save(nguoiDung);
 
-        DiaChiNhanSAdm diaChi = mapToDiaChiEntity(dto,nguoiDung);
-        diaChi.setMa("DC" + UUID.randomUUID().toString().substring(0,10));
+        // Gửi email ngay sau khi lưu người dùng
+        sendWelcomeEmail(nguoiDung, rawPassword);
+
+        DiaChiNhanSAdm diaChi = mapToDiaChiEntity(dto, nguoiDung);
+
+        // Lấy số nhà từ địa chỉ
+        String fullAddress = diaChi.getDiaChi();
+        if (fullAddress != null) {
+            int count = 0;
+            int pos = fullAddress.length();
+            for (int i = fullAddress.length() - 1; i >= 0; i--) {
+                if (fullAddress.charAt(i) == ',') {
+                    count++;
+                    if (count == 3) {
+                        pos = i;
+                        break;
+                    }
+                }
+            }
+            String soNha = fullAddress.substring(0, pos).trim();
+            diaChi.setSoNha(soNha);
+        } else {
+            diaChi.setSoNha(null);
+        }
+
+        diaChi.setMa("DC" + UUID.randomUUID().toString().substring(0, 10));
         return diaChiNhanSAdmRepo.save(diaChi);
     }
+
 
     @Override
     public NguoiDungSAdm searchNguoiDungBySDT(String sdt) {
         return nguoiDungSAdmRepo.searchNguoiDungSAdmBySoDienThoai((sdt));
+    }
+
+    private void sendWelcomeEmail(NguoiDungSAdm user, String rawPassword) {
+        try {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+            helper.setTo(user.getEmail());
+            helper.setSubject("Chào mừng bạn đến với hệ thống SD-02");
+
+            String content = String.format(
+                    "Xin chào %s,\n\n"
+                            + "Tài khoản của bạn đã được tạo thành công trên hệ thống SD-02.\n"
+                            + "Tên đăng nhập: %s\n"
+                            + "Mật khẩu tạm thời: %s\n\n"
+                            + "Vui lòng đăng nhập và đổi mật khẩu ngay sau lần đăng nhập đầu tiên.\n\n"
+                            + "Trân trọng,\nĐội ngũ SD-02",
+                    user.getHoTen(),
+                    user.getTenDangNhap(),
+                    rawPassword
+            );
+
+            helper.setText(content.replace("\n", "<br>"), true); // Gửi email dưới dạng HTML
+
+            javaMailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Lỗi khi gửi email tạo tài khoản: " + e.getMessage(), e);
+        }
     }
 }

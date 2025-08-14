@@ -5,6 +5,7 @@ import com.example.style_store_be_adminSP.entity.SanPhamCtAdm;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -56,6 +57,9 @@ public interface ChiTietSPRepoAdm extends JpaRepository<SanPhamCtAdm, Long> {
             Long xuatXuId,
             Long chatLieuId
     );
+    @Modifying
+    @Query("UPDATE SanPhamCtAdm spct SET spct.trangThai = :trangThaiMoi WHERE spct.sanPham.id = :idSanPham")
+    void updateTrangThaiBySanPham(@Param("idSanPham") Long idSanPham, @Param("trangThaiMoi") Integer trangThaiMoi);
 
 
 }

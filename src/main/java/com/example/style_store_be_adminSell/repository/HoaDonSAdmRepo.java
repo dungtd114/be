@@ -19,13 +19,13 @@ public interface HoaDonSAdmRepo extends JpaRepository<HoaDonSAdm, Long> {
 
     HoaDonSAdm findByMa(String ma);
 
-    @Query("SELECT h FROM HoaDonSAdm h WHERE h.ngayNhan >= :fromDate AND h.trangThai = 3")
+    @Query("SELECT h FROM HoaDonSAdm h WHERE h.ngayDat >= :fromDate AND h.trangThai = 3")
     List<HoaDonSAdm> findHoaDonTrongThangVaTrangThai1(@Param("fromDate") LocalDateTime fromDate);
 
-    @Query("SELECT h FROM HoaDonSAdm h WHERE h.ngayNhan BETWEEN :startOfDay AND :endOfDay AND h.trangThai = 3")
+    @Query("SELECT h FROM HoaDonSAdm h WHERE h.ngayDat BETWEEN :startOfDay AND :endOfDay AND h.trangThai = 3")
     List<HoaDonSAdm> findHoaDonNgayBDVaNgayKTAdnTrangThai1(@Param("startOfDay") LocalDateTime startOfDay,
                                                            @Param("endOfDay") LocalDateTime endOfDay);
-    @Query("SELECT h FROM HoaDonSAdm h WHERE h.ngayNhan BETWEEN :startOfDay AND :endOfDay")
+    @Query("SELECT h FROM HoaDonSAdm h WHERE h.ngayDat BETWEEN :startOfDay AND :endOfDay")
     List<HoaDonSAdm> findHoaDonNgayBDVaNgayKT(@Param("startOfDay") LocalDateTime startOfDay,
                                               @Param("endOfDay") LocalDateTime endOfDay);
 

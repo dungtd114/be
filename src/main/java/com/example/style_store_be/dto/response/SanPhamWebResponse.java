@@ -4,25 +4,33 @@ import com.example.style_store_be.entity.*;
 import jakarta.persistence.Column;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.*;
 
 import java.util.Date;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class SanPhamWebResponse {
     private Long id;
 
-    private SanPham sanPham;
+    private String tenSanPham;
 
-    private MauSacSp mauSac;
+    private String tenMauSac;
 
-    private ThuongHieu thuongHieu;
+    private String maMauSac;
 
-    private KichThuoc kichThuoc;
+    private String tenThuongHieu;
 
-    private XuatXu xuatXu;
+    private String tenKichThuoc;
 
-    private ChatLieu chatLieu;
+    private String tenXuatXu;
 
-    private HinhAnh hinhAnhSp;
+    private String tenChatLieu;
+
+    private String hinhAnhSp;
 
     private String ma;
 
@@ -32,15 +40,11 @@ public class SanPhamWebResponse {
 
     private Integer soLuong;
 
-    private Date ngayTao;
-
-    private Date ngaySua;
-
-    private Date ngayXoa;
-
     private Integer trangThai;
 
     private String moTa;
 
-    private String giaBanGoc;
+    private Double giaBanGoc;
+
+
 }

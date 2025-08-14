@@ -2,6 +2,9 @@ package com.example.style_store_be.repository.website;
 
 import com.example.style_store_be.dto.UserDto;
 import com.example.style_store_be.entity.User;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -60,4 +63,6 @@ public interface UserRepoSitory extends JpaRepository<User,Long> {
     @Transactional
     @Query("UPDATE User u SET u.trangThai = 0 WHERE u.id = :id")
     int deactivateUserById(@Param("id") Long id);
+
+    boolean existsBySoDienThoai( String soDienThoai);
 }

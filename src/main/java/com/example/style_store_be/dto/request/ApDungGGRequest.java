@@ -14,37 +14,36 @@ import java.util.Set;
 @Builder
 
 public class ApDungGGRequest {
-    @NotBlank(message = "Tên đợt giảm giá không được để trống")
-    @Size(max = 100, message = "Tên đợt giảm giá không được vượt quá 100 ký tự")
+    @NotBlank(message = "MISSING_REQUIRED_FIELDS")
+    @Size(max = 100, message = "INVALID_NAME_SIZE")
     private String tenDotGiam;
 
-    @NotNull(message = "Phần trăm giảm giá không được để trống")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Phần trăm giảm giá phải lớn hơn 0")
-    @DecimalMax(value = "100.0", message = "Phần trăm giảm giá không được vượt quá 100")
+    @NotNull(message = "MISSING_REQUIRED_FIELDS")
+    @DecimalMin(value = "0.0", inclusive = false, message = "INVALID_DISCOUNT_AMOUNT_ZERO")
+    @DecimalMax(value = "100.0", message = "INVALID_DISCOUNT_PERCENTAGE")
     private Double giamGia;
 
-    @NotNull(message = "Giảm tối đa không được để trống")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Giá trị giảm tối đa phải lớn hơn 0")
+    @NotNull(message = "MISSING_REQUIRED_FIELDS")
+    @DecimalMin(value = "0.0", inclusive = false, message = "INVALID_MAX_DISCOUNT")
     private Double giamToiDa;
 
-    @NotNull(message = "Điều kiện giảm không được để trống")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Điều kiện giảm phải lớn hơn 0")
+    @NotNull(message = "MISSING_REQUIRED_FIELDS")
+    @DecimalMin(value = "0.0", inclusive = false, message = "INVALID_CONDITION")
     private Double dieuKienGiam;
 
     private Integer soLuong;
 
-    @NotNull(message = "Ngày bắt đầu không được để trống")
+    @NotNull(message = "MISSING_REQUIRED_FIELDS")
     private Date ngayBatDau;
 
-    @NotNull(message = "Ngày kết thúc không được để trống")
-    @Future(message = "Ngày kết thúc phải là trong tương lai")
+    @NotNull(message = "MISSING_REQUIRED_FIELDS")
+    @Future(message = "INVALID_END_DATE")
     private Date ngayKetThuc;
 
-    @Size(max = 500, message = "Mô tả không được vượt quá 500 ký tự")
+    @Size(max = 500, message = "INVALID_DESCRIPTION")
     private String moTa;
 
-    @NotEmpty(message = "Danh sách ID sản phẩm chi tiết không được để trống")
-    @Size(min = 1, message = "Phải cung cấp ít nhất một ID sản phẩm chi tiết")
+    @NotEmpty(message = "INVALID_PRODUCT_IDS")
     private List<Long> sanPhamCtIds;
 
 }

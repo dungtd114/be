@@ -6,6 +6,7 @@ import com.example.style_store_be.dto.request.ApDungGGRequest;
 import com.example.style_store_be.dto.request.ApDungGGUpdateRequest;
 import com.example.style_store_be.dto.request.ApiResponse;
 import com.example.style_store_be.dto.request.GiamGiaRequest;
+import com.example.style_store_be.dto.response.GiamGiaResponse;
 import com.example.style_store_be.entity.GiamGia;
 import com.example.style_store_be.entity.SanPham;
 import com.example.style_store_be.service.SanPhamWebService;
@@ -31,7 +32,7 @@ public class DotGiamGiaController {
     GiamGiaService giamGiaService;
     SanPhamWebService sanPhamWebService;
     @PostMapping("/them-phieu-giam-gia")
-    public ApiResponse<GiamGia> createVoucher(@Valid @RequestBody GiamGiaRequest request) {
+    public ApiResponse<GiamGia> createVoucher( @RequestBody GiamGiaRequest request) {
         ApiResponse<GiamGia> apiResponse = new ApiResponse<>();
         apiResponse.setResult(giamGiaService.createVoucher(request));
         return apiResponse;
@@ -44,12 +45,7 @@ public class DotGiamGiaController {
         return apiResponse;
     }
 
-    @PostMapping("/ap-phieu-giam-gia-san-pham")
-    public ApiResponse<GiamGia> updateVoucher(@RequestBody ApDungGGUpdateRequest request) {
-        ApiResponse<GiamGia> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(giamGiaService.updateVoucher(request));
-        return apiResponse;
-    }
+
 
     @GetMapping("/hien-thi")
     Page<GiamGiaDto> getPageGiamGia(
@@ -64,6 +60,18 @@ public class DotGiamGiaController {
         Pageable pageable = PageRequest.of(page, size);
         Page<GiamGiaDto> giamGiaDtos = giamGiaService.getPageGiamGia(tenGiamGia, idTrangThai, giamGia, ngayBatDau, ngayKetThuc, pageable);
         return giamGiaDtos;
+    }
+
+    @GetMapping("/chi-tiet/{id}")
+    public ApiResponse<GiamGiaResponse> detailGiamGia(@PathVariable Long id) {
+        ApiResponse<GiamGiaResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(giamGiaService.detailGiamGia(id));
+        return apiResponse;
+    }
+
+    @PutMapping("/cap-nhat/{id}")
+    GiamGiaResponse updateGiamGia(@PathVariable Long id,@Valid @RequestBody ApDungGGUpdateRequest apDungGGUpdateRequest){
+        return giamGiaService.updateGiamGia(id,apDungGGUpdateRequest);
     }
 
 }

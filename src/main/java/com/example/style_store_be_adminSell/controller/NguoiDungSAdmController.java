@@ -1,6 +1,8 @@
 package com.example.style_store_be_adminSell.controller;
 
 
+import com.example.style_store_be.exception.AppException;
+import com.example.style_store_be.exception.Errorcode;
 import com.example.style_store_be_adminSell.dto.NguoiDungDto;
 import com.example.style_store_be_adminSell.entity.DiaChiNhanSAdm;
 import com.example.style_store_be_adminSell.entity.NguoiDungSAdm;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -86,9 +89,21 @@ public class NguoiDungSAdmController {
     @PostMapping("/addDCN")
     public ResponseEntity<?> addDCN(@RequestBody DiaChiNhanSAdm dcn) {
         try {
+            // Validate dữ liệu đầu vào
+            if (dcn.getNguoiDungSAdm() == null || dcn.getNguoiDungSAdm().getId() == null) {
+                throw new AppException(Errorcode.MISSING_REQUIRED_FIELDS);
+            }
+
+            if (StringUtils.isEmpty(dcn.getDiaChi())) {
+                throw new AppException(Errorcode.MISSING_REQUIRED_FIELDS);
+            }
+            dcn.setSoNha(dcn.getDiaChi());
             DiaChiNhanSAdm saved = diaChiNhanService.addDiaChiNhan(dcn);
+
             return ResponseEntity.ok(saved);
         } catch (Exception e) {
+            // Log lỗi chi tiết
+            e.printStackTrace();
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Lỗi khi thêm địa chỉ nhận: " + e.getMessage());

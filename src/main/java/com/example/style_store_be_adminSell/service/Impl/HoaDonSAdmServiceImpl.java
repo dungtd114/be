@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -147,6 +148,7 @@ public class HoaDonSAdmServiceImpl implements HoaDonSAdmService {
     }
 
     @Override
+    @PreAuthorize("hasAuthority('CREATE_ORDER')")
     public Page<HoaDonSAdmDto> findByTrangThai(Integer trangThai, Pageable pageable) {
         return hoaDonSAdmRepo.findByTrangThai(trangThai,pageable).map(this::mapToDTO);
     }
@@ -157,6 +159,7 @@ public class HoaDonSAdmServiceImpl implements HoaDonSAdmService {
     }
 
     @Override
+    @PreAuthorize("hasAuthority('CREATE_ORDER')")
     public HoaDonSAdmDto addHoaDon(HoaDonSAdmDto hoaDon) {
         if (hoaDon.getNguoiTaoId() == null) {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -191,18 +194,21 @@ public class HoaDonSAdmServiceImpl implements HoaDonSAdmService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public List<HoaDonSAdm> findByMonthsAndTrangThai(LocalDateTime fromDate) {
         List<HoaDonSAdm> list = hoaDonSAdmRepo.findHoaDonTrongThangVaTrangThai1(fromDate);
         return list.stream().toList();
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public List<HoaDonSAdm> findByDayAndTrangThai(LocalDateTime startOfDay, LocalDateTime endOfDay) {
         List<HoaDonSAdm> list = hoaDonSAdmRepo.findHoaDonNgayBDVaNgayKTAdnTrangThai1(startOfDay,endOfDay);
         return list.stream().toList();
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public List<HoaDonSAdm> findByDay(LocalDateTime startOfDay, LocalDateTime endOfDay) {
         List<HoaDonSAdm> list = hoaDonSAdmRepo.findHoaDonNgayBDVaNgayKT(startOfDay,endOfDay);
         return list.stream().toList();
@@ -240,7 +246,7 @@ public class HoaDonSAdmServiceImpl implements HoaDonSAdmService {
                 );
 
                 String diaChiDayDu = Stream.of(
-                        diaChiNhan.getDiaChi(),
+                        diaChiNhan.getSoNha(),
                         diaChiNhan.getXa(),
                         diaChiNhan.getHuyen(),
                         diaChiNhan.getTinh()
@@ -276,14 +282,14 @@ public class HoaDonSAdmServiceImpl implements HoaDonSAdmService {
         hoaDon.setThanhToan(pttt);
         hoaDon.setTongSoLuongSp(hoaDonSAdmDto.getTongSoLuongSp());
         hoaDon.setTongTien(hoaDonSAdmDto.getTongTien());
-        hoaDon.setTrangThai(3); // Có thể dùng enum hoặc hằng số để rõ nghĩa hơn
+        hoaDon.setTrangThai(hoaDonSAdmDto.getTrangThai()); // Có thể dùng enum hoặc hằng số để rõ nghĩa hơn
         hoaDon.setMoTa(hoaDonSAdmDto.getMoTa());
 
         // Gán tiền thuế theo hình thức nhận
-        if (Objects.equals(hoaDonSAdmDto.getHinhThucNhanHang(), 0)) {
-            hoaDon.setTienThue(BigDecimal.ZERO);
+        if (Objects.equals(hoaDonSAdmDto.getHinhThucNhanHang(), 3)) {
+            hoaDon.setTienThue(BigDecimal.valueOf(0));
         } else {
-            hoaDon.setTienThue(BigDecimal.valueOf(51));
+            hoaDon.setTienThue(BigDecimal.valueOf(30000));
         }
 
         hoaDonSAdmRepo.save(hoaDon);

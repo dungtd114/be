@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -30,4 +31,5 @@ public class HoaDonAdmDto {
     private String tenNguoiTao;
     private String tenKhachHang;
     private String tenThanhToan;
+    private List<HoaDonCtAdmDto> chiTietHoaDon;
 }

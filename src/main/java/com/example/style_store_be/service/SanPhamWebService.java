@@ -1,6 +1,7 @@
 package com.example.style_store_be.service;
 
 import com.example.style_store_be.dto.SanPhamWebDto;
+import com.example.style_store_be.dto.response.SanPhamWebResponse;
 import com.example.style_store_be.entity.*;
 import com.example.style_store_be.repository.SanPhamWebRepo;
 import com.example.style_store_be.repository.website.*;
@@ -51,8 +52,28 @@ public class SanPhamWebService {
         return chatLieuWebRepo.findAll(Sort.by("ngayTao").descending());
     }
 
-    public ChiTietSanPham detailSanPhamCt(Long id) {
-        return sanPhamWebRepo.findById(id).orElseThrow(() -> new RuntimeException("Chi tiết sản phẩm không tồn tại với id: " + id));
+    public SanPhamWebResponse detailSanPhamCt(Long id) {
+        ChiTietSanPham chiTietSanPham = sanPhamWebRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Chi tiết sản phẩm không tồn tại với id: " + id));
+
+        return SanPhamWebResponse.builder()
+                .id(chiTietSanPham.getId())
+                .tenSanPham(chiTietSanPham.getSanPham() != null ? chiTietSanPham.getSanPham().getTen() : null)
+                .tenMauSac(chiTietSanPham.getMauSac() != null ? chiTietSanPham.getMauSac().getTen() : null)
+                .maMauSac(chiTietSanPham.getMauSac() != null ? chiTietSanPham.getMauSac().getMa() : null)
+                .tenThuongHieu(chiTietSanPham.getThuongHieu() != null ? chiTietSanPham.getThuongHieu().getTen() : null)
+                .tenKichThuoc(chiTietSanPham.getKichThuoc() != null ? chiTietSanPham.getKichThuoc().getTen(): null)
+                .tenXuatXu(chiTietSanPham.getXuatXu() != null ? chiTietSanPham.getXuatXu().getTen() : null)
+                .tenChatLieu(chiTietSanPham.getChatLieu() != null ? chiTietSanPham.getChatLieu().getTen(): null)
+                .hinhAnhSp(chiTietSanPham.getHinhAnhSp() != null ? chiTietSanPham.getHinhAnhSp().getHinhAnh() : null)
+                .ma(chiTietSanPham.getMa())
+                .giaNhap(chiTietSanPham.getGiaNhap())
+                .giaBan(chiTietSanPham.getGiaBan())
+                .soLuong(chiTietSanPham.getSoLuong())
+                .trangThai(chiTietSanPham.getTrangThai())
+                .moTa(chiTietSanPham.getMoTa())
+                .giaBanGoc(chiTietSanPham.getGiaBanGoc())
+                .build();
     }
 
     public List<SanPham> getListSanPham() {

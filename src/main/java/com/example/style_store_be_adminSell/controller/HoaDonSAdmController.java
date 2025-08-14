@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -145,6 +146,7 @@ public class HoaDonSAdmController {
         }
     }
 
+//    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/theo-ngay")
     public List<HoaDonSAdm> getHoaDonTheoNgayVaTrangThai(
             @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
@@ -152,7 +154,7 @@ public class HoaDonSAdmController {
     ) {
         return hoaDonSAdmService.findByDayAndTrangThai(start, end);
     }
-
+//    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/theo-ngayt")
     public List<HoaDonSAdm> getHoaDonTheoNgay(
             @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
@@ -160,7 +162,7 @@ public class HoaDonSAdmController {
     ) {
         return hoaDonSAdmService.findByDay(start, end);
     }
-
+//    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/theo-thang")
     public List<HoaDonSAdm> getHoaDonTheoThangVaTrangThai(
             @RequestParam("months") int months

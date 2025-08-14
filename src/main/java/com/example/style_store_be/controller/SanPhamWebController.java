@@ -2,6 +2,7 @@ package com.example.style_store_be.controller;
 
 import com.example.style_store_be.dto.SanPhamWebDto;
 import com.example.style_store_be.dto.request.ApiResponse;
+import com.example.style_store_be.dto.response.SanPhamWebResponse;
 import com.example.style_store_be.entity.*;
 import com.example.style_store_be.service.SanPhamWebService;
 import org.springframework.data.domain.Page;
@@ -69,7 +70,7 @@ public class SanPhamWebController {
     }
 
     @GetMapping("/chi-tiet-san-pham/{id}")
-    public ChiTietSanPham detailSanPhamCt(@PathVariable("id") Long id){
+    public SanPhamWebResponse detailSanPhamCt(@PathVariable("id") Long id){
         return sanPhamWebService.detailSanPhamCt(id);
     }
 

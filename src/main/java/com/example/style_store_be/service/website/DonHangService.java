@@ -76,6 +76,7 @@ public class DonHangService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepoSitory.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+        hoaDon.setNguoiDatHang(user.getHoTen());
         hoaDon.setKhachHang(user);
         hoaDon.setNguoiTao(user);
 
@@ -105,6 +106,7 @@ public class DonHangService {
         hoaDon.setNgayDat(new Date());
         hoaDon.setNgayTao(new Date());
         hoaDon.setTrangThai(0); // Trạng thái đơn hàng
+
         hoaDon.setTrangThaiThanhToan(1); // Đã thanh toán (VNPay thành công)
         if (hoaDon.getMa() == null || hoaDon.getMa().isEmpty()) {
             hoaDon.setMa("HD" + UUID.randomUUID().toString().substring(0, 10));
@@ -117,7 +119,7 @@ public class DonHangService {
 //                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
         hoaDon.setKhachHang(user);
         hoaDon.setNguoiTao(user);
-
+        hoaDon.setNguoiDatHang(user.getHoTen());
         PtThanhToan ptThanhToan = phuongThucTTRepo.findById(2L)
                 .orElseThrow(() -> new RuntimeException("Phương thức thanh toán VNPay không tồn tại"));
         hoaDon.setThanhToan(ptThanhToan);

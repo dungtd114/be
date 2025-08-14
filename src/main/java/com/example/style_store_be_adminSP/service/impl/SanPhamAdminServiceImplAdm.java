@@ -1,6 +1,7 @@
 package com.example.style_store_be_adminSP.service.impl;
 
 import com.example.style_store_be_adminSP.entity.SanPhamAdm;
+import com.example.style_store_be_adminSP.reposytory.ChiTietSPRepoAdm;
 import com.example.style_store_be_adminSP.reposytory.SanPhamRepoAdm;
 import com.example.style_store_be_adminSP.service.ICommonServiceAdm;
 import org.slf4j.Logger;
@@ -8,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -20,6 +22,9 @@ public class SanPhamAdminServiceImplAdm implements ICommonServiceAdm<SanPhamAdm>
 
     @Autowired
     private SanPhamRepoAdm sanPhamAdminRepository;
+
+    @Autowired
+    private ChiTietSPRepoAdm sanPhamCtRepository;
 
     @Override
     public Page<SanPhamAdm> getAll(int page, int size) {
@@ -101,6 +106,7 @@ public class SanPhamAdminServiceImplAdm implements ICommonServiceAdm<SanPhamAdm>
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         logger.info("Chuyển đổi trạng thái sản phẩm với ID: {}", id);
         if (id == null) {
@@ -117,6 +123,7 @@ public class SanPhamAdminServiceImplAdm implements ICommonServiceAdm<SanPhamAdm>
 
         if (totalQuantity == 0) {
             existing.setTrangThai(0); // Hết hàng
+            existing.setNgaySua(LocalDateTime.now());
             sanPhamAdminRepository.save(existing);
             throw new SanPhamException("Không thể chuyển đổi trạng thái sản phẩm vì số lượng bằng 0 (Hết hàng)");
         }
@@ -124,14 +131,21 @@ public class SanPhamAdminServiceImplAdm implements ICommonServiceAdm<SanPhamAdm>
         if (existing.getTrangThai() == 1) {
             existing.setTrangThai(2); // Tạm ngưng
             existing.setNgayXoa(LocalDateTime.now());
+
+            // 👉 Đồng bộ SPCT: chuyển tất cả sang trạng thái 2 (ngưng bán)
+            sanPhamCtRepository.updateTrangThaiBySanPham(existing.getId(), 2);
         } else if (existing.getTrangThai() == 2) {
-            existing.setTrangThai(1); // Kinh doanh trở lại
+            existing.setTrangThai(1); // Kinh doanh lại
             existing.setNgayXoa(null);
+
+            // 👉 Đồng bộ SPCT: chuyển tất cả sang trạng thái 1 (bán lại)
+            sanPhamCtRepository.updateTrangThaiBySanPham(existing.getId(), 1);
         }
 
         existing.setNgaySua(LocalDateTime.now());
         sanPhamAdminRepository.save(existing);
     }
+
 
     public Page<SanPhamAdm> getActive(int page, int size) {
         logger.info("Lấy danh sách sản phẩm hoạt động, trang: {}, kích thước: {}", page, size);

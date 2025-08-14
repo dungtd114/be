@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Repository
 public interface DotGiamGiaRepository extends JpaRepository<GiamGia, Long> {
@@ -32,4 +33,7 @@ public interface DotGiamGiaRepository extends JpaRepository<GiamGia, Long> {
             @Param("ngayKetThuc") Date ngayKetThuc,
             Pageable pageable);
 
+
+    @Query("SELECT g FROM GiamGia g LEFT JOIN FETCH g.chiTietSanPhams ct LEFT JOIN FETCH ct.sanPham WHERE g.id = :id")
+    Optional<GiamGia> findByIdWithChiTietSanPhams(Long id);
 }
