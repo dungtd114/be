@@ -1,5 +1,6 @@
 package com.example.style_store_be.entity;
 
+import com.example.style_store_be.dto.response.SanPhamHoaDonAdminResponse;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,6 +12,7 @@ import jakarta.persistence.Table;
 import lombok.*;
 
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -55,6 +57,7 @@ public class HoaDonCt {
 
     @Column(name = "trang_thai")
     private Integer trangThai;
+
 
 
 }

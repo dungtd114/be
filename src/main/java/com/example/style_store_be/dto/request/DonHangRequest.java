@@ -30,5 +30,6 @@ public class DonHangRequest {
 
     private String moTa;
     private List<DonHangChiTietRequest> chiTietDonHang;
+    private String soDtNguoiNhan;
 
 }

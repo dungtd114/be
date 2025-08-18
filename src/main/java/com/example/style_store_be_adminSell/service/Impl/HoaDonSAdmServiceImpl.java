@@ -82,6 +82,12 @@ public class HoaDonSAdmServiceImpl implements HoaDonSAdmService {
         entity.setNgayXoa(dto.getNgayXoa());
         entity.setTrangThai(dto.getTrangThai());
         entity.setMoTa(dto.getMoTa());
+        entity.setTrangThaiThanhToan(dto.getTrangThaiThanhToan());
+        entity.setSoDtNguoiNhan(dto.getSoDtNguoiNhan());
+        entity.setTenNguoiGiaoHang(dto.getTenNguoiGiaoHang());
+        entity.setTienKhachTra(dto.getTienKhachTra());
+        entity.setTienThua(dto.getTienThua());
+
 
         return entity;
     }
@@ -122,6 +128,11 @@ public class HoaDonSAdmServiceImpl implements HoaDonSAdmService {
         dto.setNgayXoa(entity.getNgayXoa());
         dto.setTrangThai(entity.getTrangThai());
         dto.setMoTa(entity.getMoTa());
+        dto.setTrangThaiThanhToan(entity.getTrangThaiThanhToan());
+        dto.setSoDtNguoiNhan(entity.getSoDtNguoiNhan());
+        dto.setTenNguoiGiaoHang(entity.getTenNguoiGiaoHang());
+        dto.setTienKhachTra(entity.getTienKhachTra());
+        dto.setTienThua(entity.getTienThua());
 
         return dto;
     }
@@ -177,7 +188,7 @@ public class HoaDonSAdmServiceImpl implements HoaDonSAdmService {
         hoaDon.setNgayDat(LocalDateTime.now());
         hoaDon.setTongSoLuongSp(0);
         hoaDon.setTrangThai(6);
-
+        hoaDon.setTrangThaiThanhToan(0);
         HoaDonSAdm hd = mapToEntity(hoaDon);
         HoaDonSAdm saved = hoaDonSAdmRepo.save(hd);
         return mapToDTO(saved);
@@ -214,6 +225,7 @@ public class HoaDonSAdmServiceImpl implements HoaDonSAdmService {
         return list.stream().toList();
     }
 
+    @PreAuthorize("hasAuthority('CREATE_ORDER')")
     public String updateKhachHangChoHoaDon(Long hoaDonId, HoaDonSAdmDto hoaDonSAdmDto) {
         if (hoaDonSAdmDto == null || hoaDonSAdmDto.getKhachHangId() == null) {
             throw new IllegalArgumentException("Thiếu thông tin khách hàng");
@@ -233,6 +245,7 @@ public class HoaDonSAdmServiceImpl implements HoaDonSAdmService {
 
         if (hinhThucNhan != null && hinhThucNhan == 0) {
             hoaDon.setNguoiNhanHang(khachHang.getHoTen());
+            hoaDon.setSoDtNguoiNhan(khachHang.getSoDienThoai());
             hoaDon.setDiaChiNhanHang("Tại cửa hàng");
         } else {
             DiaChiNhanSAdm diaChiNhan = null;
@@ -244,6 +257,7 @@ public class HoaDonSAdmServiceImpl implements HoaDonSAdmService {
                 hoaDon.setNguoiNhanHang(
                         diaChiNhan.getTenNguoiNhan() != null ? diaChiNhan.getTenNguoiNhan() : khachHang.getHoTen()
                 );
+                hoaDon.setSoDtNguoiNhan(diaChiNhan.getSoDienThoai() != null ? diaChiNhan.getSoDienThoai(): khachHang.getSoDienThoai());
 
                 String diaChiDayDu = Stream.of(
                         diaChiNhan.getSoNha(),
@@ -256,6 +270,7 @@ public class HoaDonSAdmServiceImpl implements HoaDonSAdmService {
             } else {
                 hoaDon.setNguoiNhanHang(khachHang.getHoTen());
                 hoaDon.setDiaChiNhanHang(khachHang.getDiaChi());
+                hoaDon.setSoDtNguoiNhan(khachHang.getSoDienThoai());
             }
         }
 
@@ -284,13 +299,10 @@ public class HoaDonSAdmServiceImpl implements HoaDonSAdmService {
         hoaDon.setTongTien(hoaDonSAdmDto.getTongTien());
         hoaDon.setTrangThai(hoaDonSAdmDto.getTrangThai()); // Có thể dùng enum hoặc hằng số để rõ nghĩa hơn
         hoaDon.setMoTa(hoaDonSAdmDto.getMoTa());
-
-        // Gán tiền thuế theo hình thức nhận
-        if (Objects.equals(hoaDonSAdmDto.getHinhThucNhanHang(), 3)) {
-            hoaDon.setTienThue(BigDecimal.valueOf(0));
-        } else {
-            hoaDon.setTienThue(BigDecimal.valueOf(30000));
-        }
+        hoaDon.setTienThue(hoaDonSAdmDto.getTienThue());
+        hoaDon.setTienKhachTra(hoaDonSAdmDto.getTienKhachTra());
+        hoaDon.setTienThua(hoaDonSAdmDto.getTienThua());
+        hoaDon.setTrangThaiThanhToan(1);
 
         hoaDonSAdmRepo.save(hoaDon);
         return "Cập nhật hoá đơn thành công";

@@ -1,6 +1,7 @@
 package com.example.style_store_be_adminSell.entity;
 
 
+import com.example.style_store_be.entity.HoaDonCt;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,11 +9,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -86,4 +89,24 @@ public class HoaDonSAdm {
     @JoinColumn(name = "id_khach_hang")
     private NguoiDungSAdm khachHang;
 
+    @Column(name = "trang_thai_thanh_toan")
+    private Integer trangThaiThanhToan;
+
+    @Column(name = "so_dt_nguoi_nhan")
+    private String soDtNguoiNhan;
+
+    @OneToMany(mappedBy = "hoaDon")
+    private Set<HoaDonCTSAdm> hoaDonCts;
+
+    @Column(name = "ten_nguoi_giao_hang")
+    private String tenNguoiGiaoHang;
+
+    @Column(name = "so_dt_nguoi_giao_hang")
+    private String sdtNguoiGiaoHang;
+
+    @Column(name = "tien_khach_tra")
+    private BigDecimal tienKhachTra;
+
+    @Column(name="tien_thua")
+    private BigDecimal tienThua;
 }

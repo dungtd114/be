@@ -1,17 +1,11 @@
 package com.example.style_store_be.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -88,4 +82,21 @@ public class HoaDon {
     @Column(name = "trang_thai_thanh_toan")
     private Integer trangThaiThanhToan;
 
+    @Column(name = "so_dt_nguoi_nhan")
+    private String soDtNguoiNhan;
+
+    @OneToMany(mappedBy = "hoaDon")
+    private Set<HoaDonCt> hoaDonCts;
+
+    @Column(name = "ten_nguoi_giao_hang")
+    private String tenNguoiGiaoHang;
+
+    @Column(name = "so_dt_nguoi_giao_hang")
+    private String sdtNguoiGiaoHang;
+
+    @Column(name = "tien_khach_tra")
+    private Double tienKhachTra;
+
+    @Column(name="tien_thua")
+    private Double tienThua;
 }

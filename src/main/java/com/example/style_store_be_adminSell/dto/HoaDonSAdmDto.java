@@ -56,5 +56,17 @@ public class HoaDonSAdmDto {
 
     private String moTa;
 
+    private Integer trangThaiThanhToan;
+
     private Integer hinhThucNhanHang;
+
+    private String soDtNguoiNhan;
+
+    private String tenNguoiGiaoHang;
+
+    private String sdtNguoiGiaoHang;
+
+    private BigDecimal tienKhachTra;
+
+    private BigDecimal tienThua;
 }
