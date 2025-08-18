@@ -243,10 +243,10 @@ public class HoaDonSAdmServiceImpl implements HoaDonSAdmService {
         Integer hinhThucNhan = hoaDonSAdmDto.getHinhThucNhanHang();
         Long diaChiNhanId = hoaDonSAdmDto.getDiaChiNhanId();
 
-        if (hinhThucNhan != null && hinhThucNhan == 0) {
+        if (Objects.equals(hoaDonSAdmDto.getHinhThucNhanHang(), 3)) {
             hoaDon.setNguoiNhanHang(khachHang.getHoTen());
             hoaDon.setSoDtNguoiNhan(khachHang.getSoDienThoai());
-            hoaDon.setDiaChiNhanHang("Tại cửa hàng");
+            hoaDon.setDiaChiNhanHang(khachHang.getDiaChi());
         } else {
             DiaChiNhanSAdm diaChiNhan = null;
             if (diaChiNhanId != null) {
