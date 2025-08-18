@@ -95,9 +95,6 @@ public class HoaDonSAdm {
     @Column(name = "so_dt_nguoi_nhan")
     private String soDtNguoiNhan;
 
-    @OneToMany(mappedBy = "hoaDon")
-    private Set<HoaDonCTSAdm> hoaDonCts;
-
     @Column(name = "ten_nguoi_giao_hang")
     private String tenNguoiGiaoHang;
 
