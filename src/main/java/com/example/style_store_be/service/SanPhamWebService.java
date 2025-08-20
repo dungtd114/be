@@ -154,7 +154,6 @@ public class SanPhamWebService {
     }
 
     public ChiTietSanPham addSanPhamChiTiet(SanPhamAdminCrRequest request) {
-        // Kiểm tra xem đã tồn tại sản phẩm chi tiết với các thuộc tính này chưa (trừ hình ảnh)
         Optional<ChiTietSanPham> existingProduct = sanPhamWebRepo.findByAttributes(
                 request.getSanPhamId(),
                 request.getMauSacId(),
@@ -176,11 +175,15 @@ public class SanPhamWebService {
             chiTietSanPham.setMoTa(request.getMoTa());
             chiTietSanPham.setNgaySua(new Date());
         } else {
-            // Nếu chưa tồn tại, tạo mới sản phẩm chi tiết
             chiTietSanPham = sanPhamCtAdmiMapper.toChiTietSanPham(request);
             chiTietSanPham.setNgayTao(new Date());
             chiTietSanPham.setTrangThai(1);
-            chiTietSanPham.setGiaBanGoc(request.getGiaBan()); // Lưu giá gốc
+            if (chiTietSanPham.getHinhAnhSp() == null || chiTietSanPham.getHinhAnhSp().toString().isEmpty()){
+                HinhAnh hinhAnh = hinhAnhSpRepo.findById(1L)
+                        .orElseThrow(() -> new RuntimeException("Hình ảnh mặc định không tồn tại"));
+                chiTietSanPham.setHinhAnhSp(hinhAnh);
+            }
+            chiTietSanPham.setGiaBanGoc(request.getGiaBan());
         }
 
         return sanPhamWebRepo.save(chiTietSanPham);
@@ -295,6 +298,22 @@ public class SanPhamWebService {
 
             spct.setTrangThai(trangThaiMoi);
             sanPhamWebRepo.save(spct);
+        } else {
+            throw new RuntimeException("Không tìm thấy sản phẩm chi tiết với ID: " + id);
+        }
+    }
+
+    public void chuyenTrangThaiSP(Long id) {
+        Optional<SanPham> optionalSPCT = ttSanPhamWebRepo.findById(id);
+
+        if (optionalSPCT.isPresent()) {
+            SanPham sp = optionalSPCT.get();
+
+            int trangThaiHienTai = sp.getTrangThai();
+            int trangThaiMoi = (trangThaiHienTai == 1) ? 0 : 1;
+
+            sp.setTrangThai(trangThaiMoi);
+            ttSanPhamWebRepo.save(sp);
         } else {
             throw new RuntimeException("Không tìm thấy sản phẩm chi tiết với ID: " + id);
         }

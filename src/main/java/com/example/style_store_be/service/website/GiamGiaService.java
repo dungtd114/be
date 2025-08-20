@@ -69,7 +69,7 @@ public class GiamGiaService {
             throw new AppException(Errorcode.INVALID_DATE_RANGE);
         }
         giamGia.setNgayTao(new Date());
-        giamGia.setSoLuong(1);
+        giamGia.setSoLuong(1); // Giả định mỗi mã giảm giá được áp dụng một lần
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepoSitory.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
@@ -77,9 +77,9 @@ public class GiamGiaService {
         giamGia.setNguoiTao(user.getHoTen());
         Date currentDate = new Date();
         if (currentDate.after(giamGia.getNgayBatDau()) && currentDate.before(giamGia.getNgayKetThuc())) {
-            giamGia.setTrangThai(1);
+            giamGia.setTrangThai(1); // Đang hoạt động
         } else {
-            giamGia.setTrangThai(2);
+            giamGia.setTrangThai(2); // Không hoạt động (có thể là chưa đến hạn hoặc đã hết hạn)
         }
         GiamGia savedGiamGia = dotGiamGiaRepository.save(giamGia);
 
@@ -99,7 +99,13 @@ public class GiamGiaService {
 
             if (bestGiamGia.getId().equals(savedGiamGia.getId()) && savedGiamGia.getTrangThai() == 1) {
                 if (chiTietSanPham.getGiaBanGoc() != null && chiTietSanPham.getGiaBanGoc() >= savedGiamGia.getDieuKienGiam()) {
-                    double discountAmount = chiTietSanPham.getGiaBanGoc() * savedGiamGia.getGiamGia();
+
+                    if (savedGiamGia.getGiamToiDa() > chiTietSanPham.getGiaBanGoc()) {
+                        throw new AppException(Errorcode.INVALID_DISCOUNT_AMOUNT);
+                    }
+
+                    // ⭐ Đã thêm / 100.0 vào đây
+                    double discountAmount = chiTietSanPham.getGiaBanGoc() * (savedGiamGia.getGiamGia() / 100.0);
                     if (discountAmount > savedGiamGia.getGiamToiDa()) {
                         discountAmount = savedGiamGia.getGiamToiDa();
                     }
@@ -110,10 +116,8 @@ public class GiamGiaService {
                     throw new RuntimeException("Sản phẩm với ID " + chiTietSanPham.getId() + " không đủ điều kiện áp dụng mã giảm giá");
                 }
             }
-
             sanPhamWebRepo.save(chiTietSanPham);
         }
-
         return savedGiamGia;
     }
 
@@ -192,16 +196,20 @@ public class GiamGiaService {
         }
 
         for (ChiTietSanPham chiTietSanPham : newChiTietSanPhams) {
+            if (chiTietSanPham.getGiaBanGoc() != null && apDungGGUpdateRequest.getGiamToiDa() > chiTietSanPham.getGiaBanGoc()) {
+                throw new RuntimeException("Số tiền giảm tối đa (" + apDungGGUpdateRequest.getGiamToiDa() +
+                        ") không được lớn hơn giá bán gốc của sản phẩm (" + chiTietSanPham.getGiaBanGoc() + ") cho sản phẩm ID: " + chiTietSanPham.getId());
+            }
+
             if (!chiTietSanPham.getDotGiamGias().contains(giamGia)) {
                 chiTietSanPham.getDotGiamGias().add(giamGia);
-                giamGia.getChiTietSanPhams().add(chiTietSanPham); // Đảm bảo thêm vào cả phía GiamGia
+                giamGia.getChiTietSanPhams().add(chiTietSanPham);
             }
             updateProductPrice(chiTietSanPham);
             sanPhamWebRepo.save(chiTietSanPham);
         }
 
         GiamGia savedGiamGia = dotGiamGiaRepository.save(giamGia);
-
         return apDungGGMapper.toGiamGiaResponse(savedGiamGia);
     }
 
@@ -216,7 +224,8 @@ public class GiamGiaService {
 
         if (bestGiamGia != null && chiTietSanPham.getGiaBanGoc() != null &&
                 chiTietSanPham.getGiaBanGoc() >= bestGiamGia.getDieuKienGiam()) {
-            double discountAmount = chiTietSanPham.getGiaBanGoc() * bestGiamGia.getGiamGia();
+            // ⭐ Đã thêm / 100.0 vào đây
+            double discountAmount = chiTietSanPham.getGiaBanGoc() * (bestGiamGia.getGiamGia() / 100.0);
             if (discountAmount > bestGiamGia.getGiamToiDa()) {
                 discountAmount = bestGiamGia.getGiamToiDa();
             }

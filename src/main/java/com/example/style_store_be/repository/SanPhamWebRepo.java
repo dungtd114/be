@@ -128,7 +128,7 @@ public interface SanPhamWebRepo extends JpaRepository<ChiTietSanPham,Long> {
             "AND (:mauSacId IS NULL OR c.mauSac.id = :mauSacId) " +
             "AND (:chatLieuId IS NULL OR c.chatLieu.id = :chatLieuId) " +
             "AND (:kichThuocId IS NULL OR c.kichThuoc.id = :kichThuocId) " +
-            "AND (:xuatXuId IS NULL OR c.xuatXu.id = :xuatXuId) " +   // ✅ Thêm điều kiện lọc theo xuất xứ
+            "AND (:xuatXuId IS NULL OR c.xuatXu.id = :xuatXuId) " +
             "AND (:minPrice IS NULL OR c.giaBan >= :minPrice) " +
             "AND (:maxPrice IS NULL OR c.giaBan <= :maxPrice) " +
             "AND c.sanPham.id = :sanPhamId " +

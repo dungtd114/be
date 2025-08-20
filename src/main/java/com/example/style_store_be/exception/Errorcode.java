@@ -39,6 +39,7 @@ public enum Errorcode {
     INVALID_DISCOUNT_AMOUNT(1109, "Số tiền giảm giá không được vượt quá số tiền của sản phẩm chi tiết"),
     INVALID_DISCOUNT_PERCENTAGE(1110, "Phần trăm giảm giá không được vượt quá 100%"),
     INVALID_DISCOUNT_AMOUNT_ZERO(1111, "Số tiền giảm giá phải lớn hơn 0"),
+
     ;
 
     private int code;

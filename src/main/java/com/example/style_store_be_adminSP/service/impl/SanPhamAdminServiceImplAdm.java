@@ -175,7 +175,7 @@ public class SanPhamAdminServiceImplAdm implements ICommonServiceAdm<SanPhamAdm>
                     Long totalQuantity = (Long) obj[1];
 
                     if (totalQuantity == 0 && sanPham.getTrangThai() != 0) {
-                        sanPham.setTrangThai(0);
+                        sanPham.setTrangThai(1);
                         sanPhamAdminRepository.save(sanPham);
                     } else if (totalQuantity > 0 && sanPham.getTrangThai() == 0) {
                         sanPham.setTrangThai(1);

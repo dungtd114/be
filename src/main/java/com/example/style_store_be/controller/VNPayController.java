@@ -37,13 +37,16 @@ public class VNPayController {
     @PostMapping("/submitOrder")
     public ResponseEntity<String> submitOrder(
             @RequestBody DonHangRequest request,
-            @RequestHeader("Authorization") String bearerToken,
+            @RequestHeader(value = "Authorization",required = false) String bearerToken,
             HttpServletRequest httpRequest
     ) {
         String txnRef = String.valueOf(System.currentTimeMillis());
         String orderInfo = "Thanh toan don hang #" + txnRef;
 
-        String token = bearerToken.replace("Bearer ", "");
+        String token = null;
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            token = bearerToken.replace("Bearer ", "");
+        }
 
         // Lưu đơn hàng + token vào RAM
         donHangTamMemory.save(txnRef, request, token);
@@ -62,20 +65,34 @@ public class VNPayController {
 
         if (status == 1 && donHangTam != null) {
             DonHangRequest donHangRequest = donHangTam.getRequest();
-            String token = donHangTam.getToken();
 
-            // ✅ Dùng token để lấy email (không dùng SecurityContext nữa!)
-            String email = jwtService.extractUsername(token);
-            User user = userRepoSitory.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+            // ✅ Lấy token từ DonHangTam (hoặc request header nếu có)
+            String token = donHangTam.getToken();
+            if (token == null || token.isEmpty()) {
+                token = request.getHeader("Authorization"); // lấy từ header nếu có
+                if (token != null && token.startsWith("Bearer ")) {
+                    token = token.substring(7);
+                }
+            }
+
+            User user = null;
+            if (token != null && !token.isEmpty()) {
+                try {
+                    String email = jwtService.extractUsername(token);
+                    user = userRepoSitory.findByEmail(email).orElse(null);
+                } catch (Exception e) {
+                    user = null; // token lỗi thì bỏ qua
+                }
+            }
 
             donHangService.createrDonHangVNPay(donHangRequest, user);
             response.sendRedirect("http://localhost:5173/thanh-toan-thanh-cong");
         } else {
             response.sendRedirect("http://localhost:5173/thanh-toan-that-bai");
         }
-
     }
+
+
 
 
 

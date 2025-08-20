@@ -56,18 +56,22 @@ public interface DonHangRepoSitory extends JpaRepository<HoaDon,Long> {
     );
 
     @Query("""
-                SELECT new com.example.style_store_be.dto.HoaDonCtDto(
-                    ct.id,
-                    ct.sanPhamCt.hinhAnhSp.hinhAnh,
-                    ct.tenSanPham,
-                    ct.giaTien,
-                    ct.soLuong,
-                    ct.thanhTien
-                )
-                FROM HoaDonCt ct
-                WHERE ct.hoaDon.id = :hoaDonId
-                  AND (:tenSanPham IS NULL OR LOWER(ct.tenSanPham) LIKE LOWER(CONCAT('%', :tenSanPham, '%')))
-            """)
+    SELECT new com.example.style_store_be.dto.HoaDonCtDto(
+        ct.id,
+        spct.hinhAnhSp.hinhAnh,
+        ct.tenSanPham,
+        ct.giaTien,
+        ct.soLuong,
+        ct.thanhTien,
+        spct.mauSac.ten,
+        spct.chatLieu.ten,
+        spct.thuongHieu.ten,
+        spct.kichThuoc.ten
+    )
+    FROM HoaDonCt ct JOIN ct.sanPhamCt spct
+    WHERE ct.hoaDon.id = :hoaDonId
+    AND (:tenSanPham IS NULL OR LOWER(ct.tenSanPham) LIKE LOWER(CONCAT('%', :tenSanPham, '%')))
+""")
     List<HoaDonCtDto> getChiTietByHoaDonIdAndTenSanPham(
             @Param("hoaDonId") Long hoaDonId,
             @Param("tenSanPham") String tenSanPham
@@ -115,35 +119,38 @@ public interface DonHangRepoSitory extends JpaRepository<HoaDon,Long> {
 
 
 
-        @Query("SELECT new com.example.style_store_be.dto.response.HoaDonAdminResponse(" +
-                "hd.id, " +
-                "hd.thanhToan.ten, " +  // ptThanhToan
-                "hd.khachHang.soDienThoai, " +  // soDienThoaiKhachHang
-                "hd.ma, " +
-                "hd.nguoiDatHang, " +
-                "hd.nguoiNhanHang, " +
-                "hd.diaChiNhanHang, " +
-                "hd.tongSoLuongSp, " +
-                "hd.tongTien, " +
-                "hd.tienThue, " +
-                "hd.ngayDat, " +
-                "hd.ngayNhan, " +
-                "hd.ngayTao, " +
-                "hd.ngaySua, " +
-                "hd.ngayXoa, " +
-                "hd.trangThai, " +
-                "hd.moTa, " +
-                "hd.trangThaiThanhToan, " +
-                "hd.soDtNguoiNhan, " +
-                "hd.tenNguoiGiaoHang, " +
-                "hd.sdtNguoiGiaoHang, " +
-                "hd.tienKhachTra, " +
-                "hd.tienThua) " +
-                "FROM HoaDon hd " +
-                "WHERE hd.id = :id")
-        Optional<HoaDonAdminResponse> findHoaDonAdminResponseById(@Param("id") Long id);
+    @Query("SELECT new com.example.style_store_be.dto.response.HoaDonAdminResponse(" +
+            "hd.id, " +
+            "COALESCE(tt.ten, ''), " +
+            "COALESCE(kh.soDienThoai, ''), " +
+            "hd.ma, " +
+            "hd.nguoiDatHang, " +
+            "hd.nguoiNhanHang, " +
+            "hd.diaChiNhanHang, " +
+            "hd.tongSoLuongSp, " +
+            "hd.tongTien, " +
+            "hd.tienThue, " +
+            "hd.ngayDat, " +
+            "hd.ngayNhan, " +
+            "hd.ngayTao, " +
+            "hd.ngaySua, " +
+            "hd.ngayXoa, " +
+            "hd.trangThai, " +
+            "hd.moTa, " +
+            "hd.trangThaiThanhToan, " +
+            "hd.soDtNguoiNhan, " +
+            "hd.tenNguoiGiaoHang, " +
+            "hd.sdtNguoiGiaoHang, " +
+            "hd.tienKhachTra, " +
+            "hd.tienThua) " +
+            "FROM HoaDon hd " +
+            "LEFT JOIN hd.thanhToan tt " +
+            "LEFT JOIN hd.khachHang kh " +
+            "WHERE hd.id = :id")
+    Optional<HoaDonAdminResponse> findHoaDonAdminResponseById(@Param("id") Long id);
 
-        @Query("SELECT new com.example.style_store_be.dto.response.SanPhamHoaDonAdminResponse(" +
+
+    @Query("SELECT new com.example.style_store_be.dto.response.SanPhamHoaDonAdminResponse(" +
                 "hdct.id, " +  // idHoaDonCt
                 "hdct.sanPhamCt.id, " +  // idSanPham
                 "hdct.tenSanPham, " +

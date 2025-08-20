@@ -94,4 +94,6 @@ public class SanPhamWebDto {
         this.giaBanGoc = giaBanGoc;
         this.giamGia = giamGia;
     }
+
+
 }

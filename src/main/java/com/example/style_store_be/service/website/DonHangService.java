@@ -69,21 +69,36 @@ public class DonHangService {
         hoaDon.setNgayTao(new Date());
         hoaDon.setTrangThai(0);
         hoaDon.setTrangThaiThanhToan(0);
+
         if (hoaDon.getMa() == null || hoaDon.getMa().isEmpty()) {
             hoaDon.setMa("HD" + UUID.randomUUID().toString().substring(0, 10));
         }
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepoSitory.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
-        hoaDon.setNguoiDatHang(user.getHoTen());
-        hoaDon.setKhachHang(user);
-        hoaDon.setNguoiTao(user);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean hasValidToken = false;
 
-        PtThanhToan ptThanhToan = phuongThucTTRepo.findById(1L).orElseThrow(() -> new RuntimeException("Phương thức thanh toán không tồn tại"));
+        if (authentication != null && authentication.isAuthenticated()
+                && !"anonymousUser".equals(authentication.getPrincipal())) {
+            String email = authentication.getName();
+            userRepoSitory.findByEmail(email).ifPresent(user -> {
+                hoaDon.setNguoiDatHang(user.getHoTen());
+                hoaDon.setKhachHang(user);
+                hoaDon.setNguoiTao(user);
+            });
+            hasValidToken = true; // ✅ token hợp lệ
+        } else {
+            hoaDon.setNguoiDatHang(null);
+            hoaDon.setKhachHang(null);
+            hoaDon.setNguoiTao(null);
+        }
+
+        PtThanhToan ptThanhToan = phuongThucTTRepo.findById(1L)
+                .orElseThrow(() -> new RuntimeException("Phương thức thanh toán không tồn tại"));
         hoaDon.setThanhToan(ptThanhToan);
+
         Double tongTienHoaDon = request.getTongTien() - request.getTienThue();
         hoaDon.setTongTien(tongTienHoaDon);
+
         HoaDon savedHoaDon = donHangRepoSitory.save(hoaDon);
 
         if (request.getChiTietDonHang() != null && !request.getChiTietDonHang().isEmpty()) {
@@ -97,34 +112,46 @@ public class DonHangService {
             donHangChiTietRepo.saveAll(hoaDonCts);
         }
 
-        sendInvoiceEmail(savedHoaDon);
+        // ✅ Chỉ gửi email khi token hợp lệ
+        if (hasValidToken) {
+            sendInvoiceEmail(savedHoaDon);
+        }
+
         return savedHoaDon;
     }
+
 
     public HoaDon createrDonHangVNPay(DonHangRequest request, User user) {
         HoaDon hoaDon = donHangMapper.toHoaDon(request);
         hoaDon.setNgayDat(new Date());
         hoaDon.setNgayTao(new Date());
         hoaDon.setTrangThai(0); // Trạng thái đơn hàng
-
         hoaDon.setTrangThaiThanhToan(1); // Đã thanh toán (VNPay thành công)
+
         if (hoaDon.getMa() == null || hoaDon.getMa().isEmpty()) {
             hoaDon.setMa("HD" + UUID.randomUUID().toString().substring(0, 10));
         }
+        boolean hasValidToken = false;
+        // ✅ Nếu có user thì set, còn không thì bỏ qua
+        if (user != null) {
+            hoaDon.setKhachHang(user);
+            hoaDon.setNguoiTao(user);
+            hoaDon.setNguoiDatHang(user.getHoTen());
+            hasValidToken = true; // ✅ token hợp lệ
 
-    // String email = SecurityContextHolder.getContext().getAuthentication().getName();
-    //  User user = userRepoSitory.findByEmail(email)
-     //          .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
-//        User user = userRepoSitory.findById(1L)
-//                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
-        hoaDon.setKhachHang(user);
-        hoaDon.setNguoiTao(user);
-        hoaDon.setNguoiDatHang(user.getHoTen());
+        } else {
+            hoaDon.setKhachHang(null);
+            hoaDon.setNguoiTao(null);
+            hoaDon.setNguoiDatHang(null);
+        }
+
         PtThanhToan ptThanhToan = phuongThucTTRepo.findById(2L)
                 .orElseThrow(() -> new RuntimeException("Phương thức thanh toán VNPay không tồn tại"));
         hoaDon.setThanhToan(ptThanhToan);
+
         Double tongTienHoaDon = request.getTongTien() - request.getTienThue();
         hoaDon.setTongTien(tongTienHoaDon);
+
         HoaDon savedHoaDon = donHangRepoSitory.save(hoaDon);
 
         if (request.getChiTietDonHang() != null && !request.getChiTietDonHang().isEmpty()) {
@@ -137,10 +164,11 @@ public class DonHangService {
                     .collect(Collectors.toList());
             donHangChiTietRepo.saveAll(hoaDonCts);
         }
-
-        sendInvoiceEmail(savedHoaDon);
+        if (hasValidToken){
+        sendInvoiceEmail(savedHoaDon);}
         return savedHoaDon;
     }
+
 
     private void sendInvoiceEmail(HoaDon hoaDon) {
         try {

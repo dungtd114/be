@@ -200,6 +200,11 @@ public class SanPhamWebController {
         sanPhamWebService.chuyenTrangThaiSPCT(id);
         return "Chuyển trạng thái đơn hàng thành công";
     }
+    @GetMapping("/chuyen-trang-thai-sp/{id}")
+    public String chuyenTrangThaiSP(@PathVariable Long id) {
+        sanPhamWebService.chuyenTrangThaiSP(id);
+        return "Chuyển trạng thái sp thành công";
+    }
 
 
 }
