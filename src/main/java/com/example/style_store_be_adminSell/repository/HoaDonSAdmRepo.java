@@ -9,7 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public interface HoaDonSAdmRepo extends JpaRepository<HoaDonSAdm, Long> {
 
@@ -25,12 +27,23 @@ public interface HoaDonSAdmRepo extends JpaRepository<HoaDonSAdm, Long> {
     @Query("SELECT h FROM HoaDonSAdm h WHERE h.ngayDat BETWEEN :startOfDay AND :endOfDay AND h.trangThai = 3")
     List<HoaDonSAdm> findHoaDonNgayBDVaNgayKTAdnTrangThai1(@Param("startOfDay") LocalDateTime startOfDay,
                                                            @Param("endOfDay") LocalDateTime endOfDay);
-    @Query("SELECT h FROM HoaDonSAdm h WHERE h.ngayDat BETWEEN :startOfDay AND :endOfDay")
+    @Query("SELECT h FROM HoaDonSAdm h " +
+            "WHERE h.ngayDat BETWEEN :startOfDay AND :endOfDay " +
+            "AND h.khachHang IS NOT NULL " +
+            "AND h.trangThai <> 6")
     List<HoaDonSAdm> findHoaDonNgayBDVaNgayKT(@Param("startOfDay") LocalDateTime startOfDay,
                                               @Param("endOfDay") LocalDateTime endOfDay);
 
+    @Query("SELECT h FROM HoaDonSAdm h " +
+            "WHERE h.ngayNhan BETWEEN :startOfDay AND :endOfDay " +
+            "AND h.khachHang IS NOT NULL " +
+            "AND h.trangThai = 3")
+    List<HoaDonSAdm> findByNgayNhanRangeAndHoanThanh(
+            @Param("startOfDay") LocalDateTime startOfDay,
+            @Param("endOfDay") LocalDateTime endOfDay);
+
     @Modifying
-    @Query("UPDATE HoaDonSAdm h SET h.trangThai = 4 WHERE h.id = :id AND h.trangThai = 6")
+    @Query("UPDATE HoaDonSAdm h SET h.trangThai = 4, h.khachHang = null WHERE h.id = :id AND h.trangThai = 6")
     int updateHoaDonTrangThai(@Param("id") Long id);
 
 }

@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -220,6 +221,13 @@ public class HoaDonSAdmServiceImpl implements HoaDonSAdmService {
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
+    public List<HoaDonSAdm> findByDayAndTrangThai3(LocalDateTime startOfDay, LocalDateTime endOfDay) {
+        List<HoaDonSAdm> list = hoaDonSAdmRepo.findByNgayNhanRangeAndHoanThanh(startOfDay,endOfDay);
+        return list.stream().toList();
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public List<HoaDonSAdm> findByDay(LocalDateTime startOfDay, LocalDateTime endOfDay) {
         List<HoaDonSAdm> list = hoaDonSAdmRepo.findHoaDonNgayBDVaNgayKT(startOfDay,endOfDay);
         return list.stream().toList();
@@ -273,7 +281,7 @@ public class HoaDonSAdmServiceImpl implements HoaDonSAdmService {
                 hoaDon.setSoDtNguoiNhan(khachHang.getSoDienThoai());
             }
         }
-
+        hoaDon.setTongTien(BigDecimal.ZERO);
         hoaDonSAdmRepo.save(hoaDon);
         return "Cập nhật khách hàng thành công";
     }

@@ -96,4 +96,11 @@ public class HoaDonAdminController {
         return hoaDonAdminService.getListLichSu(id);
     }
 
+    @GetMapping("/huy-don-hang/{id}")
+    public String huyDonHang(@PathVariable Long id) {
+        hoaDonAdminService.huyDonHang(id);
+        return "Chuyển trạng thái đơn hàng thành công";
+    }
+
+
 }

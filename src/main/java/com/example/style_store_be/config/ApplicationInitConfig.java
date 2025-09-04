@@ -35,7 +35,7 @@ public class ApplicationInitConfig {
 
                 User user = User.builder()
                         .ma("admin")
-                        .hoTen("Tran Van Hoa")
+                        .hoTen("Trần Văn Hoà")
                         .gioiTinh(1)
                         .soDienThoai("0123456789")
                         .namSinh(new SimpleDateFormat("yyyy-MM-dd").parse("2005-01-01"))

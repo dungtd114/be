@@ -4,13 +4,11 @@ import com.example.style_store_be.dto.GiamGiaDto;
 import com.example.style_store_be.dto.HoaDonCtDto;
 import com.example.style_store_be.dto.LichSuDonHangDto;
 import com.example.style_store_be.dto.request.DonHangRequest;
-import com.example.style_store_be.entity.HoaDon;
-import com.example.style_store_be.entity.HoaDonCt;
-import com.example.style_store_be.entity.PtThanhToan;
-import com.example.style_store_be.entity.User;
+import com.example.style_store_be.entity.*;
 import com.example.style_store_be.mapper.DonHangChiTietMapper;
 import com.example.style_store_be.mapper.DonHangMapper;
 import com.example.style_store_be.repository.PhuongThucTTRepo;
+import com.example.style_store_be.repository.SanPhamWebRepo;
 import com.example.style_store_be.repository.website.DonHangChiTietRepo;
 import com.example.style_store_be.repository.website.DonHangRepoSitory;
 import com.example.style_store_be.repository.website.UserRepoSitory;
@@ -46,6 +44,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -62,6 +62,7 @@ public class DonHangService {
     UserRepoSitory userRepoSitory;
     PhuongThucTTRepo phuongThucTTRepo;
     JavaMailSender javaMailSender;
+    SanPhamWebRepo sanPhamWebRepo;
 
     public HoaDon createrDonHang(DonHangRequest request) {
         HoaDon hoaDon = donHangMapper.toHoaDon(request);
@@ -112,7 +113,6 @@ public class DonHangService {
             donHangChiTietRepo.saveAll(hoaDonCts);
         }
 
-        // ✅ Chỉ gửi email khi token hợp lệ
         if (hasValidToken) {
             sendInvoiceEmail(savedHoaDon);
         }
@@ -159,11 +159,26 @@ public class DonHangService {
                     .map(chiTietRequest -> {
                         HoaDonCt hoaDonCt = donHangChiTietMapper.toDonHangCt(chiTietRequest);
                         hoaDonCt.setHoaDon(savedHoaDon);
+
+                        // ✅ Trừ số lượng sản phẩm
+                        ChiTietSanPham sanPhamCt = sanPhamWebRepo.findById(chiTietRequest.getSanPhamctId())
+                                .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
+
+                        int soLuongConLai = sanPhamCt.getSoLuong() - chiTietRequest.getSoLuong();
+                        if (soLuongConLai < 0) {
+                            throw new RuntimeException("Sản phẩm " + sanPhamCt.getMa() + " không đủ số lượng trong kho");
+                        }
+                        sanPhamCt.setSoLuong(soLuongConLai);
+                        sanPhamWebRepo.save(sanPhamCt);
+
                         return hoaDonCt;
                     })
                     .collect(Collectors.toList());
+
             donHangChiTietRepo.saveAll(hoaDonCts);
         }
+
+
         if (hasValidToken){
         sendInvoiceEmail(savedHoaDon);}
         return savedHoaDon;
@@ -172,10 +187,12 @@ public class DonHangService {
 
     private void sendInvoiceEmail(HoaDon hoaDon) {
         try {
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-            helper.setTo("quyetvan0803@gmail.com");
+            helper.setTo(email);
             helper.setSubject("Hóa đơn đặt hàng #" + hoaDon.getMa());
             helper.setText("Cảm ơn bạn đã đặt hàng. Vui lòng xem file đính kèm để xem chi tiết hóa đơn.");
 
@@ -187,6 +204,7 @@ public class DonHangService {
             throw new RuntimeException("Lỗi khi gửi email: " + e.getMessage(), e);
         }
     }
+
 
     private byte[] generateInvoicePdf(HoaDon hoaDon) {
         try {
@@ -235,7 +253,12 @@ public class DonHangService {
             infoTable.addCell(new Cell().add(new Paragraph("Khách hàng:").setBold()).setPadding(5));
             infoTable.addCell(new Cell().add(new Paragraph(hoaDon.getKhachHang().getHoTen())).setPadding(5));
             infoTable.addCell(new Cell().add(new Paragraph("Ngày đặt:").setBold()).setPadding(5));
-            infoTable.addCell(new Cell().add(new Paragraph(hoaDon.getNguoiDatHang())).setPadding(5));
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+            String ngayDatStr = hoaDon.getNgayDat().toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDateTime()
+                    .format(formatter);
+            infoTable.addCell(new Cell().add(new Paragraph(ngayDatStr).setPadding(5)));
             infoTable.addCell(new Cell().add(new Paragraph("Địa chỉ:").setBold()).setPadding(5));
             infoTable.addCell(new Cell().add(new Paragraph(hoaDon.getDiaChiNhanHang())).setPadding(5));
             document.add(infoTable);

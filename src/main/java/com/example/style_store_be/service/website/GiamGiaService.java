@@ -126,7 +126,7 @@ public class GiamGiaService {
         return dotGiamGiaRepository.getPageGiamGia(tenGiamGia, idTrangThai, giamGia,ngayBatDau,ngayKetThuc, pageable);
     }
 
-
+    @PreAuthorize("hasRole('ADMIN')")
     public GiamGiaResponse detailGiamGia(Long id) {
         GiamGia giamGia = dotGiamGiaRepository.findByIdWithChiTietSanPhams(id)
                 .orElseThrow(() -> new RuntimeException("Mã giảm giá không tồn tại"));
@@ -154,6 +154,7 @@ public class GiamGiaService {
         return response;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public GiamGiaResponse updateGiamGia(Long id, ApDungGGUpdateRequest apDungGGUpdateRequest) {
         GiamGia giamGia = dotGiamGiaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Mã giảm giá không tồn tại"));

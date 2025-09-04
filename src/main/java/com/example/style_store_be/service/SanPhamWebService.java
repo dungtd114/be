@@ -7,6 +7,8 @@ import com.example.style_store_be.dto.request.SanPhamAdminUpdateReq;
 import com.example.style_store_be.dto.response.SanPhamAdminResponse;
 import com.example.style_store_be.dto.response.SanPhamWebResponse;
 import com.example.style_store_be.entity.*;
+import com.example.style_store_be.exception.AppException;
+import com.example.style_store_be.exception.Errorcode;
 import com.example.style_store_be.mapper.SanPhamCtAdmiMapper;
 import com.example.style_store_be.repository.SanPhamWebRepo;
 import com.example.style_store_be.repository.website.*;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class SanPhamWebService {
@@ -176,6 +179,7 @@ public class SanPhamWebService {
             chiTietSanPham.setNgaySua(new Date());
         } else {
             chiTietSanPham = sanPhamCtAdmiMapper.toChiTietSanPham(request);
+            chiTietSanPham.setMa("CTSP-" + UUID.randomUUID().toString().substring(0, 8));
             chiTietSanPham.setNgayTao(new Date());
             chiTietSanPham.setTrangThai(1);
             if (chiTietSanPham.getHinhAnhSp() == null || chiTietSanPham.getHinhAnhSp().toString().isEmpty()){
@@ -213,7 +217,11 @@ public class SanPhamWebService {
                 .build();
     }
 
-    public String updateSanPhamCTAdmin(Long id, SanPhamAdminUpdateReq request) {
+    public ChiTietSanPham updateSanPhamCTAdmin(Long id, SanPhamAdminUpdateReq request) {
+
+        if (request.getGiaNhap() >= request.getGiaBan()) {
+            throw new AppException(Errorcode.INVALID_MIN_MAX_PRICE);
+        }
         // Lấy sản phẩm cần cập nhật
         ChiTietSanPham currentProduct = sanPhamWebRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
@@ -249,14 +257,14 @@ public class SanPhamWebService {
             // Xóa sản phẩm hiện tại (vì đã gộp vào sản phẩm trùng)
             sanPhamWebRepo.delete(currentProduct);
 
-            return "Đã gộp và cập nhật sản phẩm trùng thành công";
+            return currentProduct;
         } else {
             // Nếu không có sản phẩm trùng, cập nhật bình thường
             sanPhamCtAdmiMapper.sanPhamAdminUpdateRequest(currentProduct, request);
             currentProduct.setNgaySua(new Date());
             currentProduct.setGiaBanGoc(request.getGiaBan());
             sanPhamWebRepo.save(currentProduct);
-            return "Cập nhật thành công";
+            return currentProduct;
         }
     }
 
@@ -318,4 +326,14 @@ public class SanPhamWebService {
             throw new RuntimeException("Không tìm thấy sản phẩm chi tiết với ID: " + id);
         }
     }
+
+    public MauSacSp getMauSacById() {
+        return mauSacWebRepo.findById(1L)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy màu sắc!"));
+    }
+
+    public HinhAnh saveHinhAnh(HinhAnh hinhAnh) {
+        return hinhAnhSpRepo.save(hinhAnh);
+    }
+
 }

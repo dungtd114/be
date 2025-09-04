@@ -70,14 +70,6 @@ public class SanPhamAdminServiceImplAdm implements ICommonServiceAdm<SanPhamAdm>
         SanPhamAdm existing = sanPhamAdminRepository.findById(object.getId())
                 .orElseThrow(() -> new SanPhamException("Không tìm thấy sản phẩm với ID: " + object.getId()));
 
-        Optional<SanPhamWithQuantity> sanPhamWithQuantity = searchSanPhamWithTotalQuantity(existing.getTen(), 0, 1)
-                .getContent().stream().findFirst();
-        long totalQuantity = sanPhamWithQuantity.map(SanPhamWithQuantity::getTotalQuantity).orElse(0L);
-
-        if (totalQuantity == 0 && object.getTrangThai() != 0) {
-            throw new SanPhamException("Không thể cập nhật trạng thái của sản phẩm hết hàng (số lượng = 0)");
-        }
-
         Optional<SanPhamAdm> existingByMa = sanPhamAdminRepository.findByMa(object.getMa());
         if (existingByMa.isPresent() && !existingByMa.get().getId().equals(object.getId())) {
             throw new SanPhamException("Mã sản phẩm " + object.getMa() + " đã tồn tại");
@@ -95,7 +87,6 @@ public class SanPhamAdminServiceImplAdm implements ICommonServiceAdm<SanPhamAdm>
                 existing.setNgayXoa(LocalDateTime.now()); // Tạm ngưng => xóa mềm
             } else if (object.getTrangThai() == 0) {
                 existing.setTrangThai(0); // Hết hàng
-                // Không gán ngày xoá
             } else {
                 throw new SanPhamException("Trạng thái mới không hợp lệ, chỉ được phép là 1 (đang kinh doanh), 2 (tạm ngưng), hoặc 0 (hết hàng)");
             }
@@ -116,18 +107,6 @@ public class SanPhamAdminServiceImplAdm implements ICommonServiceAdm<SanPhamAdm>
         SanPhamAdm existing = sanPhamAdminRepository.findById(id)
                 .orElseThrow(() -> new SanPhamException("Không tìm thấy sản phẩm với ID: " + id));
 
-        Optional<SanPhamWithQuantity> sanPhamWithQuantity = searchSanPhamWithTotalQuantity(existing.getTen(), 0, 1)
-                .getContent().stream().findFirst();
-
-        long totalQuantity = sanPhamWithQuantity.map(SanPhamWithQuantity::getTotalQuantity).orElse(0L);
-
-        if (totalQuantity == 0) {
-            existing.setTrangThai(0); // Hết hàng
-            existing.setNgaySua(LocalDateTime.now());
-            sanPhamAdminRepository.save(existing);
-            throw new SanPhamException("Không thể chuyển đổi trạng thái sản phẩm vì số lượng bằng 0 (Hết hàng)");
-        }
-
         if (existing.getTrangThai() == 1) {
             existing.setTrangThai(2); // Tạm ngưng
             existing.setNgayXoa(LocalDateTime.now());
@@ -145,7 +124,6 @@ public class SanPhamAdminServiceImplAdm implements ICommonServiceAdm<SanPhamAdm>
         existing.setNgaySua(LocalDateTime.now());
         sanPhamAdminRepository.save(existing);
     }
-
 
     public Page<SanPhamAdm> getActive(int page, int size) {
         logger.info("Lấy danh sách sản phẩm hoạt động, trang: {}, kích thước: {}", page, size);
@@ -173,17 +151,6 @@ public class SanPhamAdminServiceImplAdm implements ICommonServiceAdm<SanPhamAdm>
                 .map(obj -> {
                     SanPhamAdm sanPham = (SanPhamAdm) obj[0];
                     Long totalQuantity = (Long) obj[1];
-
-                    if (totalQuantity == 0 && sanPham.getTrangThai() != 0) {
-                        sanPham.setTrangThai(1);
-                        sanPhamAdminRepository.save(sanPham);
-                    } else if (totalQuantity > 0 && sanPham.getTrangThai() == 0) {
-                        sanPham.setTrangThai(1);
-                        sanPham.setNgayXoa(null);
-                        sanPham.setNgaySua(LocalDateTime.now());
-                        sanPhamAdminRepository.save(sanPham);
-                    }
-
                     return new SanPhamWithQuantity(sanPham, totalQuantity != null ? totalQuantity : 0);
                 })
                 .collect(Collectors.toList());

@@ -20,7 +20,7 @@ public interface SanPhamRepoAdm extends JpaRepository<SanPhamAdm, Long> {
     Page<SanPhamAdm> findAllActiveByOrderByNgayTaoDesc(Pageable pageable);
 
     @Query("SELECT sp AS sanPham, " +
-            "COALESCE(SUM(CASE WHEN ctsp.trangThai IN (1, 2) THEN ctsp.soLuong ELSE 0 END), 0) AS totalQuantity " +
+            "COALESCE(SUM(CASE WHEN ctsp.trangThai IN (1, 0) THEN ctsp.soLuong ELSE 0 END), 0) AS totalQuantity " +
             "FROM SanPhamAdm sp " +
             "LEFT JOIN ChiTietSanPham ctsp ON sp.id = ctsp.sanPham.id " +
             "WHERE (:search IS NULL OR " +

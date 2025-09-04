@@ -162,6 +162,16 @@ public class HoaDonSAdmController {
     ) {
         return hoaDonSAdmService.findByDay(start, end);
     }
+
+    @GetMapping("/theo-ngayn")
+    public List<HoaDonSAdm> getHoaDonTheoNgayNhan(
+            @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end
+    ) {
+        return hoaDonSAdmService.findByDayAndTrangThai3(start, end);
+    }
+
+
 //    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/theo-thang")
     public List<HoaDonSAdm> getHoaDonTheoThangVaTrangThai(

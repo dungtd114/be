@@ -64,6 +64,7 @@ public class SanPhamCtServiceImplAdm implements SanPhamCtServiceAdm {
             throw new IllegalArgumentException("Sản phẩm chi tiết đã tồn tại. Bạn có muốn cập nhật số lượng không?");
         }
 
+        // xử lý hình ảnh màu sắc
         if (sanPhamCtDTO.getHinhAnhMauSacId() != null) {
             Optional<HinhAnhMauSacAdm> hinhAnh = hinhAnhMauSacRepository.findById(sanPhamCtDTO.getHinhAnhMauSacId());
             if (hinhAnh.isPresent() && hinhAnh.get().getTrangThai() == 1 && hinhAnh.get().getNgayXoa() == null) {
@@ -76,11 +77,10 @@ public class SanPhamCtServiceImplAdm implements SanPhamCtServiceAdm {
                 throw new IllegalArgumentException("Hình ảnh màu sắc không tồn tại hoặc không hoạt động");
             }
         } else {
-            // ❌ Không tự động gán ảnh mặc định
             sanPhamCt.setHinhAnhMauSac(null);
         }
 
-
+        // sinh mã duy nhất
         String ma = "SPCT-" + UUID.randomUUID().toString().substring(0, 8);
         while (sanPhamCtRepository.existsByMa(ma)) {
             ma = "SPCT-" + UUID.randomUUID().toString().substring(0, 8);
@@ -88,8 +88,8 @@ public class SanPhamCtServiceImplAdm implements SanPhamCtServiceAdm {
 
         sanPhamCt.setMa(ma);
         sanPhamCt.setNgayTao(LocalDateTime.now());
-        sanPhamCt.setTrangThai(1);
-        sanPhamCt.setGiaBan(sanPhamCt.getGiaBanGoc()); // Gán giá bán bằng giá gốc
+        sanPhamCt.setTrangThai(1); // mặc định đang bán
+        sanPhamCt.setGiaBan(sanPhamCt.getGiaBanGoc());
 
         SanPhamCtAdm saved = sanPhamCtRepository.save(sanPhamCt);
         return mapToDTO(saved);
@@ -100,26 +100,25 @@ public class SanPhamCtServiceImplAdm implements SanPhamCtServiceAdm {
         SanPhamCtAdm existing = sanPhamCtRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Sản phẩm chi tiết không tồn tại"));
 
-        if (existing.getTrangThai() == 2 || existing.getSanPham().getTrangThai() == 2) {
-            throw new IllegalStateException("Không thể cập nhật sản phẩm chi tiết có trạng thái 2 hoặc thuộc sản phẩm trạng thái 2");
+        // chỉ cho phép cập nhật nếu SPCT đang bán (1) hoặc ngưng bán (0)
+        if (existing.getTrangThai() != 0 && existing.getTrangThai() != 1) {
+            throw new IllegalStateException("Không thể cập nhật sản phẩm chi tiết có trạng thái không hợp lệ");
         }
 
         SanPhamCtAdm updated = mapToEntity(sanPhamCtDTO);
         validateSanPhamCt(updated);
 
-        // Xử lý hình ảnh màu sắc
+        // xử lý hình ảnh màu sắc
         if (sanPhamCtDTO.getHinhAnhMauSacId() != null) {
             Optional<HinhAnhMauSacAdm> hinhAnh = hinhAnhMauSacRepository.findById(sanPhamCtDTO.getHinhAnhMauSacId());
 
             if (hinhAnh.isPresent()) {
                 HinhAnhMauSacAdm hinhAnhFound = hinhAnh.get();
 
-                // Kiểm tra ảnh còn hoạt động
                 if (hinhAnhFound.getTrangThai() != 1 || hinhAnhFound.getNgayXoa() != null) {
                     throw new IllegalArgumentException("Hình ảnh màu sắc không tồn tại hoặc không hoạt động");
                 }
 
-                // Kiểm tra ảnh có thuộc đúng màu sắc không
                 if (!hinhAnhFound.getMauSac().getId().equals(updated.getMauSac().getId())) {
                     throw new IllegalArgumentException("Hình ảnh màu sắc không thuộc màu sắc đã chọn");
                 }
@@ -128,34 +127,29 @@ public class SanPhamCtServiceImplAdm implements SanPhamCtServiceAdm {
             } else {
                 throw new IllegalArgumentException("Hình ảnh màu sắc không tồn tại");
             }
-
         } else {
-            // Người dùng không chọn ảnh → không set gì cả (có thể set null rõ ràng)
             updated.setHinhAnhMauSac(null);
         }
 
-
-        // Kiểm tra mã trùng
+        // kiểm tra mã trùng
         if (!existing.getMa().equals(updated.getMa()) && sanPhamCtRepository.existsByMa(updated.getMa())) {
             throw new IllegalArgumentException("Mã sản phẩm chi tiết đã tồn tại");
         }
 
-        // Kiểm tra đợt giảm giá đang hoạt động
+        // kiểm tra giảm giá
         boolean coGiamGia = giamGiaSanPhamCtAdmRepository
                 .existsActiveBySanPhamCtId(existing.getId(), LocalDateTime.now());
 
-        // Nếu đang có giảm giá → không được cập nhật giá gốc
         if (coGiamGia) {
             if (!updated.getGiaBanGoc().equals(existing.getGiaBanGoc())) {
                 throw new IllegalStateException("Không thể cập nhật giá gốc khi sản phẩm đang trong đợt giảm giá");
             }
         } else {
-            // Nếu không có giảm giá → cập nhật giá gốc và đồng thời gán lại giá bán
             existing.setGiaBanGoc(updated.getGiaBanGoc());
             existing.setGiaBan(updated.getGiaBanGoc());
         }
 
-        // Cập nhật các thông tin còn lại
+        // cập nhật thông tin
         existing.setHinhAnhMauSac(updated.getHinhAnhMauSac());
         existing.setSanPham(updated.getSanPham());
         existing.setMauSac(updated.getMauSac());
@@ -174,7 +168,6 @@ public class SanPhamCtServiceImplAdm implements SanPhamCtServiceAdm {
         return mapToDTO(saved);
     }
 
-
     @Override
     public void deleteSanPhamCt(Long id) {
         if (id == null) {
@@ -184,11 +177,11 @@ public class SanPhamCtServiceImplAdm implements SanPhamCtServiceAdm {
         SanPhamCtAdm existing = sanPhamCtRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm chi tiết với id: " + id));
 
-        if (existing.getTrangThai() == 0) {
-            throw new IllegalStateException("Không thể chuyển trạng thái sản phẩm chi tiết đã bị xóa");
+        if (existing.getTrangThai() != 0 && existing.getTrangThai() != 1) {
+            throw new IllegalStateException("Trạng thái sản phẩm không hợp lệ (chỉ cho phép 0 hoặc 1)");
         }
 
-        existing.setTrangThai(existing.getTrangThai() == 1 ? 2 : 1);
+        existing.setTrangThai(existing.getTrangThai() == 1 ? 0 : 1);
         existing.setNgaySua(LocalDateTime.now());
         sanPhamCtRepository.save(existing);
     }
@@ -230,15 +223,16 @@ public class SanPhamCtServiceImplAdm implements SanPhamCtServiceAdm {
     }
 
     @Override
-    public Page<SanPhamCtDTOAdm> filterByAttributes(Long sanPhamId, Long mauSacId, Long thuongHieuId, Long kichThuocId, Long xuatXuId, Long chatLieuId, Pageable pageable) {
-        return sanPhamCtRepository.findByAttributes(sanPhamId, mauSacId, thuongHieuId, kichThuocId, xuatXuId, chatLieuId, pageable)
-                .map(this::mapToDTO);
+    public Page<SanPhamCtDTOAdm> filterByAttributes(Long sanPhamId, Long mauSacId, Long thuongHieuId,
+                                                    Long kichThuocId, Long xuatXuId, Long chatLieuId, Pageable pageable) {
+        return sanPhamCtRepository.findByAttributes(sanPhamId, mauSacId, thuongHieuId,
+                kichThuocId, xuatXuId, chatLieuId, pageable).map(this::mapToDTO);
     }
 
     private void validateSanPhamCt(SanPhamCtAdm sanPhamCt) {
         if (sanPhamCt.getSanPham() == null || !sanPhamRepository.findById(sanPhamCt.getSanPham().getId())
-                .filter(sp -> sp.getTrangThai() != 2).isPresent()) {
-            throw new IllegalArgumentException("Sản phẩm không tồn tại hoặc có trạng thái không hợp lệ");
+                .filter(sp -> sp.getTrangThai() == 1).isPresent()) {
+            throw new IllegalArgumentException("Sản phẩm không tồn tại hoặc không đang hoạt động");
         }
         if (sanPhamCt.getMauSac() == null || !mauSacRepository.findById(sanPhamCt.getMauSac().getId())
                 .filter(ms -> ms.getTrangThai() == 1).isPresent()) {
@@ -277,8 +271,8 @@ public class SanPhamCtServiceImplAdm implements SanPhamCtServiceAdm {
                     .orElseThrow(() -> new IllegalArgumentException("Hình ảnh màu sắc không tồn tại hoặc không hoạt động")));
         }
         entity.setSanPham(sanPhamRepository.findById(dto.getSanPhamId())
-                .filter(sp -> sp.getTrangThai() != 2)
-                .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại hoặc có trạng thái không hợp lệ")));
+                .filter(sp -> sp.getTrangThai() == 1)
+                .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại hoặc không hoạt động")));
         entity.setMauSac(mauSacRepository.findById(dto.getMauSacId())
                 .filter(ms -> ms.getTrangThai() == 1)
                 .orElseThrow(() -> new IllegalArgumentException("Màu sắc không tồn tại hoặc không hoạt động")));
@@ -296,7 +290,7 @@ public class SanPhamCtServiceImplAdm implements SanPhamCtServiceAdm {
                 .orElseThrow(() -> new IllegalArgumentException("Chất liệu không tồn tại hoặc không hoạt động")));
         entity.setMa(dto.getMa());
         entity.setGiaNhap(dto.getGiaNhap());
-        entity.setGiaBanGoc(dto.getGiaBanGoc()); // <-- Thêm dòng này
+        entity.setGiaBanGoc(dto.getGiaBanGoc());
         entity.setGiaBan(dto.getGiaBan());
         entity.setSoLuong(dto.getSoLuong());
         entity.setMoTa(dto.getMoTa());
@@ -319,7 +313,7 @@ public class SanPhamCtServiceImplAdm implements SanPhamCtServiceAdm {
         dto.setChatLieuId(entity.getChatLieu().getId());
         dto.setMa(entity.getMa());
         dto.setGiaNhap(entity.getGiaNhap());
-        dto.setGiaBanGoc(entity.getGiaBanGoc()); // <-- Thêm dòng này
+        dto.setGiaBanGoc(entity.getGiaBanGoc());
         dto.setGiaBan(entity.getGiaBan());
         dto.setSoLuong(entity.getSoLuong());
         dto.setMoTa(entity.getMoTa());

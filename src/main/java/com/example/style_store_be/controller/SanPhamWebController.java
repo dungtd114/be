@@ -7,13 +7,19 @@ import com.example.style_store_be.dto.response.SanPhamAdminResponse;
 import com.example.style_store_be.dto.response.SanPhamWebResponse;
 import com.example.style_store_be.entity.*;
 import com.example.style_store_be.service.SanPhamWebService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/website/san-pham")
@@ -160,8 +166,10 @@ public class SanPhamWebController {
     }
 
     @PutMapping("/cap-nhat-thong-tin-san-pham-chi-tiet/{id}")
-    String updateSanPhamCTAdmin(@PathVariable Long id, @RequestBody SanPhamAdminUpdateReq request) {
-        return sanPhamWebService.updateSanPhamCTAdmin(id,request);
+    public ApiResponse<ChiTietSanPham> updateSanPhamCTAdmin(@PathVariable Long id, @Valid @RequestBody SanPhamAdminUpdateReq request) {
+        ApiResponse<ChiTietSanPham> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(sanPhamWebService.updateSanPhamCTAdmin(id,request));
+        return apiResponse;
     }
 
     @GetMapping("/hien-thi-san-pham-admin2/{sanPhamId}")
@@ -206,5 +214,36 @@ public class SanPhamWebController {
         return "Chuyển trạng thái sp thành công";
     }
 
+    @PostMapping("/upload-hinh-anh")
+    public ApiResponse<HinhAnh> uploadHinhAnh(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "moTa", required = false) String moTa
+    ) throws IOException {
+        ApiResponse<HinhAnh> response = new ApiResponse<>();
+
+        if (file.isEmpty()) {
+            throw new RuntimeException("File rỗng!");
+        }
+
+        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+        String uploadDir = "E:/testDATN/style-store-be/src/uploads/";
+        File dest = new File(uploadDir + fileName);
+        file.transferTo(dest);
+        MauSacSp mauSac = sanPhamWebService.getMauSacById();
+
+        HinhAnh hinhAnh = HinhAnh.builder()
+                .mauSac(mauSac)
+                .hinhAnh(fileName) // chỉ lưu tên file hoặc path tương đối
+                .moTa(moTa)
+                .ngayTao(new Date())
+                .trangThai(1)
+                .build();
+
+        HinhAnh saved = sanPhamWebService.saveHinhAnh(hinhAnh);
+
+        response.setResult(saved);
+        return response;
+    }
 
 }

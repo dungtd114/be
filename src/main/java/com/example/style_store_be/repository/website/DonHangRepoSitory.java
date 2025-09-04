@@ -98,7 +98,8 @@ public interface DonHangRepoSitory extends JpaRepository<HoaDon,Long> {
             "h.trangThai, " +
             "h.moTa, " +
             "h.trangThaiThanhToan, " +
-            "h.soDtNguoiNhan) " +
+            "h.soDtNguoiNhan," +
+            "ptt.id) " +
             "FROM HoaDon h " +
             "LEFT JOIN h.nguoiTao nt " +
             "LEFT JOIN h.nguoiXuat nx " +

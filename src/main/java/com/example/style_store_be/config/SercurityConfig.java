@@ -27,7 +27,6 @@ public class SercurityConfig {
             "/auth/refresh",
             "/auth/dang-xuat",
             "/auth/introspect",
-            "/nguoi-dung/**",
             "/website/san-pham/**",
             "/api/upload",
             "/don-hang/**",
@@ -37,20 +36,18 @@ public class SercurityConfig {
             "/api/admin-san-pham/**",
             "/api/mau-sac/**",
             "/api/kich-thuoc/**",
-            "/admin/giam-gia/**",
             "/api/hinh-anh-mau-sac/**",
             "/api/chat-lieu/**",
             "/api/admin/hoa-don-chi-tiet/**",
-            "/admin/hoa-don-admin/**",
             "/api/hoa-don/**",
             "/api/admin/nguoi-dung/**",
             "/dia-chi-nhan/**",
             "/api/admin/thong-ke/**",
             "/api/thong-ke/**",
             "/api/admin/san-pham-ct/**",
-            "/api/vnpay/**"
-
-
+            "/api/vnpay/**",
+            "/api/admin/hoa-don/ma/**",
+            "/api/admin/hoa-don/searchID/**"
     };
 
 

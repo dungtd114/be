@@ -97,7 +97,6 @@ public interface SanPhamWebRepo extends JpaRepository<ChiTietSanPham,Long> {
             "AND (:minPrice IS NULL OR c.giaBan >= :minPrice) " +
             "AND (:maxPrice IS NULL OR c.giaBan <= :maxPrice) " +
             "AND c.sanPham.id = :sanPhamId " +  // ✅ bắt buộc lọc theo id sản phẩm
-            "AND c.trangThai = 1 " +
             "GROUP BY c.id, c.ma, c.giaNhap, c.giaBan, c.soLuong, c.ngayTao, c.ngaySua, c.ngayXoa, c.trangThai, c.moTa, " +
             "c.sanPham.id, c.sanPham.ten, c.mauSac.id, c.mauSac.ten, c.thuongHieu.id, c.thuongHieu.ten, " +
             "c.kichThuoc.id, c.kichThuoc.ten, c.xuatXu.id, c.xuatXu.ten, c.chatLieu.id, c.chatLieu.ten, " +

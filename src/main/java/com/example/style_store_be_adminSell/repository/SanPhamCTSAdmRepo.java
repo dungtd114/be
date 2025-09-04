@@ -16,7 +16,7 @@ public interface SanPhamCTSAdmRepo extends JpaRepository<SanPhamCtAdm, Long> {
     // Check existence by product code
     boolean existsByMa(String ma);
 
-    // Find by product name containing
+    // Find by product code containing
     @Query("SELECT spct FROM SanPhamCtAdm spct WHERE spct.sanPham.ma LIKE CONCAT('%', :ma, '%')")
     Page<SanPhamCtAdm> findBySanPhamMaContaining(@Param("ma") String ma, Pageable pageable);
 
@@ -27,9 +27,10 @@ public interface SanPhamCTSAdmRepo extends JpaRepository<SanPhamCtAdm, Long> {
     // Find by status
     Page<SanPhamCtAdm> findByTrangThai(Integer trangThai, Pageable pageable);
 
-
+    // Find by attributes with condition that SanPhamAdm must have trangThai = 1
     @Query("SELECT spct FROM SanPhamCtAdm spct " +
             "WHERE spct.trangThai = 1 " +
+            "AND spct.sanPham.trangThai = 1 " +
             "AND (" +
             "  (:sanPhamMa IS NULL OR LOWER(spct.ma) LIKE LOWER(CONCAT('%', :sanPhamMa, '%'))) " +
             "  OR (:sanPhamTen IS NULL OR LOWER(spct.sanPham.ten) LIKE LOWER(CONCAT('%', :sanPhamTen, '%'))) " +
@@ -51,6 +52,5 @@ public interface SanPhamCTSAdmRepo extends JpaRepository<SanPhamCtAdm, Long> {
             @Param("chatLieuId") Long chatLieuId,
             Pageable pageable
     );
-
 
 }

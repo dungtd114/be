@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -57,14 +58,16 @@ public class UserService {
         return userRepoSitory.save(user);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public Page<UserDto> getPageStaff(String hoTenOrSoDTOrEmail, Integer gioiTinh, Integer trangThai, Pageable pageable) {
         return userRepoSitory.getPageStaff(hoTenOrSoDTOrEmail, gioiTinh, trangThai, pageable);
     }
-
+    @PreAuthorize("hasAuthority('CREATE_ORDER')")
     public Page<UserDto> getPageUser(String hoTenOrSoDTOrEmail, Integer gioiTinh, Integer trangThai, Pageable pageable) {
         return userRepoSitory.getPageUser(hoTenOrSoDTOrEmail, gioiTinh, trangThai, pageable);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public User createStaff(UserCreationRequest request) {
         if (userRepoSitory.existsByEmail(request.getEmail()))
             throw new AppException(Errorcode.EMAIL_EXISTED);
@@ -81,7 +84,7 @@ public class UserService {
         user.setRole(role);
 
         user.setMa("nv" + UUID.randomUUID().toString().substring(0, 10));
-        user.setTenDangNhap(request.getTenDangNhap());
+        user.setTenDangNhap(request.getEmail());
         user.setNgayTao(new Date());
 
         User savedUser = userRepoSitory.save(user);
@@ -93,6 +96,7 @@ public class UserService {
 
 
 
+    @PreAuthorize("hasAuthority('CREATE_ORDER')")
     public UserResponse getUserDetail(Long id) {
         User user = userRepoSitory.findById(id)
                 .orElseThrow(() -> new AppException(Errorcode.USER_NOT_EXISTED));
@@ -110,6 +114,7 @@ public class UserService {
 
     }
 
+    @PreAuthorize("hasAuthority('CREATE_ORDER')")
     public UserResponse updateUser(Long id, UserUpdateRequest updaterequest) {
 
         User user = userRepoSitory.findById(id).orElseThrow(()-> new RuntimeException("User không tồn tại"));
@@ -126,7 +131,7 @@ public class UserService {
         return userMapper.toUserResponse(userRepoSitory.save(user));
     }
 
-
+    @PreAuthorize("hasRole('ADMIN')")
     public void removeUser(Long id) {
         int updated = userRepoSitory.deactivateUserById(id);
         if (updated == 0) {
@@ -134,6 +139,7 @@ public class UserService {
         }
     }
 
+    @PreAuthorize("hasAuthority('CREATE_ORDER')")
     public User createrCustomer(UserCreationRequest request) {
         if (userRepoSitory.existsByEmail(request.getEmail()))
             throw new AppException(Errorcode.EMAIL_EXISTED);
@@ -150,7 +156,7 @@ public class UserService {
         user.setRole(role);
 
         user.setMa("nv" + UUID.randomUUID().toString().substring(0, 10));
-        user.setTenDangNhap(request.getTenDangNhap());
+        user.setTenDangNhap(request.getEmail());
         user.setNgayTao(new Date());
 
         User savedUser = userRepoSitory.save(user);

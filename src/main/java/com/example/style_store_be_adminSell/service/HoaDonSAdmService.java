@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface HoaDonSAdmService {
 
@@ -29,6 +30,9 @@ public interface HoaDonSAdmService {
     List<HoaDonSAdm> findByMonthsAndTrangThai(LocalDateTime fromDate);
 
     List<HoaDonSAdm> findByDayAndTrangThai(LocalDateTime startOfDay,LocalDateTime endOfDay);
+
+    List<HoaDonSAdm> findByDayAndTrangThai3(LocalDateTime startOfDay,LocalDateTime endOfDay);
+
 
     List<HoaDonSAdm> findByDay(LocalDateTime startOfDay,LocalDateTime endOfDay);
 
